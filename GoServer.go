@@ -5,10 +5,10 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-
-	"github.com/gorilla/mux"
 	"io"
 	"time"
+
+	"github.com/gorilla/mux"
 )
 
 type Page struct {
@@ -30,7 +30,7 @@ var thePost Post
 
 func main() {
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/css/{path}", CssHandler)
+	router.HandleFunc("/content/{type}/{filename}", StaticHandler)
 	router.HandleFunc("/", Index)
 	router.HandleFunc("/game", GameStart)
 	router.HandleFunc("/game/{gamestate}", Game)
@@ -38,14 +38,13 @@ func main() {
 	log.Fatal (http.ListenAndServe(":8080", router))
 }
 
-func CssHandler(w http.ResponseWriter, req *http.Request) {
+func StaticHandler(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
-	static_file := vars["path"]
-	if len(static_file) != 0 {
-		f, err := http.Dir("css/").Open(static_file)
+	if len(vars["filename"]) != 0 {
+		f, err := http.Dir("content/"+vars["type"]+"/").Open(vars["filename"])
 		if err == nil {
 			content := io.ReadSeeker(f)
-			http.ServeContent(w, req, static_file, time.Now(), content)
+			http.ServeContent(w, req, vars["filename"], time.Now(), content)
 			return
 		}
 	}

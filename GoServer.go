@@ -1,16 +1,17 @@
 package main
+
 // this is a basic web service in Go! :)
 
 import (
 	"html/template"
-	"log"
-	"net/http"
-	"io"
-	"time"
 	"image"
 	"image/color"
 	"image/png"
+	"io"
+	"log"
 	"math"
+	"net/http"
+	"time"
 
 	"github.com/gorilla/mux"
 )
@@ -19,9 +20,8 @@ type Page struct {
 	Title string
 }
 type Comment struct {
-	Author string
-	Content string
-	CreatedTime time.Time
+	Author, Content string
+	CreatedTime     time.Time
 }
 type Post struct {
 	Comments []Comment
@@ -62,7 +62,6 @@ func GetImage(writer http.ResponseWriter) {
 			m.Set(x, y, c)
 		}
 	}
-
 	png.Encode(writer, m)
 }
 
@@ -82,13 +81,13 @@ func main() {
 	router.HandleFunc("/game/{gamestate}", Game)
 	router.HandleFunc("/CommentList", CommentList)
 	router.HandleFunc("/test", Test)
-	log.Fatal (http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
 func StaticHandler(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	if len(vars["filename"]) != 0 {
-		f, err := http.Dir("content/"+vars["type"]+"/").Open(vars["filename"])
+		f, err := http.Dir("content/" + vars["type"] + "/").Open(vars["filename"])
 		if err == nil {
 			content := io.ReadSeeker(f)
 			http.ServeContent(w, req, vars["filename"], time.Now(), content)

@@ -8,10 +8,12 @@ import (
 	"net/http"
 )
 
+// A Circle is a Circle
 type Circle struct {
 	X, Y, R float64
 }
 
+// Brightness gets the brightness for an x y pixel based on the Circle
 func (c *Circle) Brightness(x, y float64) uint8 {
 	var dx, dy float64 = c.X - x, c.Y - y
 	d := math.Sqrt(dx*dx+dy*dy) / c.R
@@ -22,6 +24,7 @@ func (c *Circle) Brightness(x, y float64) uint8 {
 	}
 }
 
+// GetImage writes a png to the http response, it 'GET's an image
 func GetImage(writer http.ResponseWriter) {
 	var w, h int = 280, 240
 	var hw, hh float64 = float64(w / 2), float64(h / 2)

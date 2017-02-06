@@ -34,7 +34,8 @@ type Comment struct {
 
 // Post is a container for comments
 type Post struct {
-	Comments []Comment
+	CurrentUser string
+	Comments    []Comment
 }
 
 // User is a user of the site!!
@@ -48,7 +49,7 @@ type User struct {
 // Insert a User
 func (user User) Insert() int {
 	var id int
-	err := db.QueryRow("INSERT INTO users(name,email,hash,salt,created) VALUES($1,$2,$3,$4) RETURNING id", user.Name, user.Email, user.Hash, user.CreatedTime).Scan(&id)
+	err := db.QueryRow("INSERT INTO users(name,email,hash,created) VALUES($1,$2,$3,$4) RETURNING id", user.Name, user.Email, user.Hash, user.CreatedTime).Scan(&id)
 	if err != nil {
 		return -1
 	}
@@ -61,7 +62,7 @@ func ValidatePassword(username, password string) int {
 	var user User
 	err := row.Scan(&user.ID, &user.Hash)
 	if err == nil {
-		err = bcrypt.CompareHashAndPassword(user.Hash, password)
+		err = bcrypt.CompareHashAndPassword([]byte(user.Hash), []byte(password))
 		if err == nil {
 			return user.ID
 		}

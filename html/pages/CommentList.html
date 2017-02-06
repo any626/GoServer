@@ -7,7 +7,7 @@
         <div class="col-sm-4">
             <form action="/CommentList" method="post" class="row">
                 <div class="form-group col-sm-12">
-                    <input name="Author" type="text" class="form-control" placeholder="Name">
+                    <input readonly name="Author" type="text" class="form-control" placeholder="Name" value="{{.CurrentUser}}">
                 </div>
                 <div class="form-group col-sm-12">
                     <textarea class="form-control" rows="5" name="Content" placeholder="Comment"></textarea>

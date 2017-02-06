@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"time"
 
+	"fmt"
+
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -14,7 +16,13 @@ func Index(w http.ResponseWriter, r *http.Request) {
 }
 
 // FinalizeLogin generates cookie and save session info
-func FinalizeLogin(id int, w http.ResponseWriter, r *http.Request) {
+func FinalizeLogin(username string, w http.ResponseWriter, r *http.Request) {
+	cookie := &http.Cookie{
+		Name:  "login-name",
+		Value: username,
+		Path:  "/",
+	}
+	http.SetCookie(w, cookie)
 	http.Redirect(w, r, "/", 302)
 }
 
@@ -30,7 +38,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	if Username != "" && Password != "" {
 		id := ValidatePassword(Username, Password)
 		if id >= 0 {
-			FinalizeLogin(id, w, r)
+			FinalizeLogin(Username, w, r)
 		}
 		val.Errors = true
 	}
@@ -47,8 +55,9 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		checkErr(err)
 		id := User{Name: Username, Hash: string(hash)}.Insert()
 		if id >= 0 {
-			FinalizeLogin(id, w, r)
+			FinalizeLogin(Username, w, r)
 		}
+		fmt.Println(id)
 		val.Errors = true
 	}
 	templates.ExecuteTemplate(w, "Register", val)
@@ -68,8 +77,11 @@ func Game(w http.ResponseWriter, r *http.Request) {
 
 // CommentList is the wip bulletin board
 func CommentList(w http.ResponseWriter, r *http.Request) {
-	Author := r.FormValue("Author")
+	Author := ""
 	Content := r.FormValue("Content")
+	if cookie, err := r.Cookie("login-name"); err == nil {
+		Author = cookie.Value
+	}
 	if Author != "" && Content != "" {
 		// add new comment
 		Comment{
@@ -79,6 +91,7 @@ func CommentList(w http.ResponseWriter, r *http.Request) {
 		}.Insert()
 	}
 	var thePost Post
+	thePost.CurrentUser = Author
 	thePost.Comments = GetComments()
 	templates.ExecuteTemplate(w, "CommentList", thePost)
 }

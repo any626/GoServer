@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"time"
 
+	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/yaml.v2"
 )
 
@@ -28,11 +29,44 @@ type Page struct {
 type Comment struct {
 	Author, Content string
 	CreatedTime     time.Time
+	DisplayTime     string
 }
 
 // Post is a container for comments
 type Post struct {
 	Comments []Comment
+}
+
+// User is a user of the site!!
+type User struct {
+	ID                int
+	Name, Email, Hash string
+	CreatedTime       time.Time
+	Banned            bool
+}
+
+// Insert a User
+func (user User) Insert() int {
+	var id int
+	err := db.QueryRow("INSERT INTO users(name,email,hash,salt,created) VALUES($1,$2,$3,$4) RETURNING id", user.Name, user.Email, user.Hash, user.CreatedTime).Scan(&id)
+	if err != nil {
+		return -1
+	}
+	return int(id)
+}
+
+// ValidatePassword validates the pw!
+func ValidatePassword(username, password string) int {
+	row := db.QueryRow("SELECT id,hash FROM users WHERE name = $1", username)
+	var user User
+	err := row.Scan(&user.ID, &user.Hash)
+	if err == nil {
+		err = bcrypt.CompareHashAndPassword(user.Hash, password)
+		if err == nil {
+			return user.ID
+		}
+	}
+	return -1
 }
 
 // Connect to database
@@ -71,10 +105,33 @@ func GetComments() []Comment {
 		var comment Comment
 		err := rows.Scan(&comment.Author, &comment.Content, &comment.CreatedTime)
 		checkErr(err)
+		comment.DisplayTime = friendlyString(time.Since(comment.CreatedTime))
 		Comments = append(Comments, comment)
 	}
 	err = rows.Err()
 	checkErr(err)
 
 	return Comments
+}
+
+func friendlyString(duration time.Duration) string {
+	if duration.Hours() >= 48 {
+		return fmt.Sprintf("%.0f days ago", duration.Hours()/24)
+	}
+	if duration.Hours() >= 24 {
+		return "1 day ago"
+	}
+	if duration.Hours() >= 2 {
+		return fmt.Sprintf("%.0f hours ago", duration.Hours())
+	}
+	if duration.Hours() >= 1 {
+		return "1 hour ago"
+	}
+	if duration.Minutes() >= 2 {
+		return fmt.Sprintf("%.0f minutes ago", duration.Minutes())
+	}
+	if duration.Minutes() >= 1 {
+		return "1 minute ago"
+	}
+	return "a couble seconds ago"
 }

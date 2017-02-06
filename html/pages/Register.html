@@ -1,0 +1,26 @@
+{{ define "Register" }}
+{{ template "header" }}
+<h1>Register</h1>
+<div>
+    <p>or <a href="/login">login</a></p>
+</div>
+<div class="col-sm-4">
+    {{ if.Errors }}
+        <div class="errors">
+            <p>Error: Username contains illegal characters or is already in use, please choose another</p>
+        </div>
+    {{ end }}
+    <form action="/Register" method="post" class="row">
+        <div class="form-group col-sm-12">
+            <input name="Username" type="text" class="form-control" placeholder="Name">
+        </div>
+        <div class="form-group col-sm-12">
+            <input name="Password" type="password" class="form-control" placeholder="Password">
+        </div>
+        <div class="form-group col-sm-12">
+            <input type="submit" class="btn btn-secondary wide" value="Register">
+        </div>
+    </form>
+</div>
+{{ template "footer" }}
+{{ end }}

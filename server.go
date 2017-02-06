@@ -1,12 +1,13 @@
 package main
 
-// this is a basic web service in Go! :)
+// this is my Go plaground!! :)
 
 import (
 	"html/template"
 	"io"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -28,13 +29,25 @@ func main() {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/content/{type}/{filename}", StaticHandler)
 	router.HandleFunc("/", Index)
+	router.HandleFunc("/login", Login)
+	router.HandleFunc("/register", Register)
 	router.HandleFunc("/game", GameStart)
 	router.HandleFunc("/game/{gamestate}", Game)
-	router.HandleFunc("/CommentList", CommentList)
+	router.HandleFunc("/commentlist", CommentList)
 	router.HandleFunc("/test", Test)
-	log.Fatal(http.ListenAndServe(":8080", router))
+	log.Fatal(http.ListenAndServe(":8080", LowerCaseURI(router)))
 }
 
+// LowerCaseURI lowercases all the urls so it seems case insensitive
+func LowerCaseURI(h http.Handler) http.Handler {
+	fn := func(w http.ResponseWriter, r *http.Request) {
+		r.URL.Path = strings.ToLower(r.URL.Path)
+		h.ServeHTTP(w, r)
+	}
+	return http.HandlerFunc(fn)
+}
+
+// StaticHandler handles static content such as images, css, javascript, etc
 func StaticHandler(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	if len(vars["filename"]) != 0 {

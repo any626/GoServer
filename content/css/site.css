@@ -14,6 +14,23 @@ body {
     border-radius: 15px;
     margin-bottom: 15px;
 }
+
+.author {
+    color: orange;
+    display: inline-block;
+    font-size: 110%;
+}
+
+.timestamp {
+    color: mediumseagreen;
+    display: inline-block;
+    font-size: 90%;
+    padding-left: 5px;
+}
+
+.errors {
+    color: red;
+}
 .nav-links {
 }
 

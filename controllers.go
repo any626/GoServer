@@ -1,10 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"time"
-
-	"fmt"
 
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
@@ -17,16 +16,27 @@ func Index(w http.ResponseWriter, r *http.Request) {
 
 // FinalizeLogin generates cookie and save session info
 func FinalizeLogin(username string, w http.ResponseWriter, r *http.Request) {
-	cookie := &http.Cookie{
-		Name:  "login-name",
-		Value: username,
-		Path:  "/",
-	}
 	if username == "" {
-		// try to get the browser to delete the cookie
-		cookie.Expires = time.Now()
+		cookie := &http.Cookie{
+			Name:    "login-name",
+			Value:   "",
+			Path:    "/",
+			Expires: time.Now(),
+		}
+		http.SetCookie(w, cookie)
+	} else {
+		value := map[string]string{
+			"username": username,
+		}
+		if encoded, err := sc.Encode("login-name", value); err == nil {
+			cookie := &http.Cookie{
+				Name:  "login-name",
+				Value: encoded,
+				Path:  "/",
+			}
+			http.SetCookie(w, cookie)
+		}
 	}
-	http.SetCookie(w, cookie)
 	http.Redirect(w, r, "/", 302)
 }
 
@@ -89,7 +99,10 @@ func CommentList(w http.ResponseWriter, r *http.Request) {
 	Author := ""
 	Content := r.FormValue("Content")
 	if cookie, err := r.Cookie("login-name"); err == nil {
-		Author = cookie.Value
+		value := make(map[string]string)
+		if err = sc.Decode("login-name", cookie.Value, &value); err == nil {
+			Author = value["username"]
+		}
 	}
 	if Author != "" && Content != "" {
 		// add new comment

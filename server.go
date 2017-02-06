@@ -11,11 +11,13 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/gorilla/securecookie"
 	_ "github.com/lib/pq"
 )
 
 var layouts = template.Must(template.ParseGlob("html/layout/*"))
 var templates = template.Must(layouts.ParseGlob("html/pages/*"))
+var sc *securecookie.SecureCookie
 
 func checkErr(err error) {
 	if err != nil {
@@ -24,6 +26,9 @@ func checkErr(err error) {
 }
 
 func main() {
+	var hashKey = securecookie.GenerateRandomKey(64)
+	var blockKey = securecookie.GenerateRandomKey(32)
+	sc = securecookie.New(hashKey, blockKey)
 	Connect()
 	defer Disconnect()
 	router := mux.NewRouter().StrictSlash(true)

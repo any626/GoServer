@@ -134,5 +134,5 @@ func friendlyString(duration time.Duration) string {
 	if duration.Minutes() >= 1 {
 		return "1 minute ago"
 	}
-	return "a couble seconds ago"
+	return "a couple seconds ago"
 }

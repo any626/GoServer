@@ -22,6 +22,10 @@ func FinalizeLogin(username string, w http.ResponseWriter, r *http.Request) {
 		Value: username,
 		Path:  "/",
 	}
+	if username == "" {
+		// try to get the browser to delete the cookie
+		cookie.Expires = time.Now()
+	}
 	http.SetCookie(w, cookie)
 	http.Redirect(w, r, "/", 302)
 }
@@ -43,6 +47,11 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		val.Errors = true
 	}
 	templates.ExecuteTemplate(w, "Login", val)
+}
+
+// Logout is the logout page for the site
+func Logout(w http.ResponseWriter, r *http.Request) {
+	FinalizeLogin("", w, r)
 }
 
 // Register is the register page for the site

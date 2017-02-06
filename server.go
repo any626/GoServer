@@ -30,6 +30,7 @@ func main() {
 	router.HandleFunc("/content/{type}/{filename}", StaticHandler)
 	router.HandleFunc("/", Index)
 	router.HandleFunc("/login", Login)
+	router.HandleFunc("/logout", Logout)
 	router.HandleFunc("/register", Register)
 	router.HandleFunc("/game", GameStart)
 	router.HandleFunc("/game/{gamestate}", Game)

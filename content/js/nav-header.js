@@ -1,0 +1,1 @@
+// check cookie and show / hide login / logout stuff in the nav

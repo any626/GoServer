@@ -1,12 +1,23 @@
-{{ define "CommentList" }}
+{{ define "MessageBoard" }}
 {{ template "header" }}
-<h1>Comments</h1>
-
+<script src="/content/js/reply.js"></script>
+<h1>Posts</h1>
+<div id="edit-box">
+    <form action="/edit-post" method="post" class="row">
+        <div class="form-group col-sm-12">
+            <textarea class="form-control edit-content" rows="5" name="Content"></textarea>
+        </div>
+        <div class="form-group col-sm-12">
+            <input type="submit" class="btn btn-secondary wide" value="save">
+        </div>
+    </form>
+</div>
 <div>
     <div class="row">
         <div class="col-sm-4">
-            <form action="/CommentList" method="post" class="row">
+            <form action="/boards" method="post" class="row">
                 <div class="form-group col-sm-12">
+                    <label>New Post</label>
                     <textarea class="form-control" rows="5" name="Content" placeholder="Comment"></textarea>
                 </div>
                 <div class="form-group col-sm-12">
@@ -16,14 +27,18 @@
             <a class="btn btn-primary" href="/">Back to home</a>
         </div>
         <div class="col-sm-8">
-        {{ with .Comments }}
+        {{ with .Posts }}
             {{ range .}}
                 <div class="comment-box">
                     <div>
                         <div class="author">{{ .Author }}</div>
                         <div class="timestamp">{{ .DisplayTime }}</div>
                     </div>
-                    <div class="comment">{{ .Content }}</div>                    
+                    <div class="comment">{{ .Content }}</div>
+                    <div>
+                        {{ if .IsOwnPost }}<div class="control-link edit" data-id="{{.ID}}">edit</div>{{ end }}
+                        <div class="control-link reply" data-id="{{.ID}}">reply</div>
+                    </div>                 
                 </div>
             {{ end }}
         {{ end }}

@@ -27,15 +27,27 @@ type Page struct {
 
 // Comment is the meat of it so far
 type Comment struct {
-	Author, Content string
-	CreatedTime     time.Time
-	DisplayTime     string
+	Author, Content      string
+	CreatedTime          time.Time
+	DisplayTime          string
+	Comments             []Comment
+	ID, ParentID, PostID int
 }
 
 // Post is a container for comments
 type Post struct {
+	Author, Content string
+	CreatedTime     time.Time
+	DisplayTime     string
+	Comments        []Comment
+	IsOwnPost       bool
+	ID              int
+}
+
+// MessageBoard is a container for posts
+type MessageBoard struct {
 	CurrentUser string
-	Comments    []Comment
+	Posts       []Post
 }
 
 // User is a user of the site!!
@@ -113,6 +125,32 @@ func GetComments() []Comment {
 	checkErr(err)
 
 	return Comments
+}
+
+// Insert a Post
+func (post Post) Insert() {
+	_, err := db.Exec("INSERT INTO posts(author,content,created) VALUES($1,$2,$3)", post.Author, post.Content, post.CreatedTime)
+	checkErr(err)
+}
+
+// GetPosts gets the posts
+func GetPosts(user string) []Post {
+	rows, err := db.Query("SELECT id,author,content,created FROM posts")
+	checkErr(err)
+	// reform rows into posts
+	var posts []Post
+	for rows.Next() {
+		var post Post
+		err := rows.Scan(&post.ID, &post.Author, &post.Content, &post.CreatedTime)
+		checkErr(err)
+		post.DisplayTime = friendlyString(time.Since(post.CreatedTime))
+		post.IsOwnPost = user == post.Author
+		posts = append(posts, post)
+	}
+	err = rows.Err()
+	checkErr(err)
+
+	return posts
 }
 
 func friendlyString(duration time.Duration) string {

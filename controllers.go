@@ -9,9 +9,16 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// Index is the Home page
-func Index(w http.ResponseWriter, r *http.Request) {
-	templates.ExecuteTemplate(w, "Index", nil)
+// GetSecureUsername from secure cookie
+func GetSecureUsername(r *http.Request) string {
+	Username := ""
+	if cookie, err := r.Cookie("login-name"); err == nil {
+		value := make(map[string]string)
+		if err = sc.Decode("login-name", cookie.Value, &value); err == nil {
+			Username = value["username"]
+		}
+	}
+	return Username
 }
 
 // FinalizeLogin generates cookie and save session info
@@ -42,6 +49,11 @@ func FinalizeLogin(username string, w http.ResponseWriter, r *http.Request) {
 
 type validation struct {
 	Errors bool
+}
+
+// Index is the Home page
+func Index(w http.ResponseWriter, r *http.Request) {
+	templates.ExecuteTemplate(w, "Index", nil)
 }
 
 // Login is the login page for the site
@@ -96,14 +108,8 @@ func Game(w http.ResponseWriter, r *http.Request) {
 
 // CommentList is the wip bulletin board
 func CommentList(w http.ResponseWriter, r *http.Request) {
-	Author := ""
+	Author := GetSecureUsername(r)
 	Content := r.FormValue("Content")
-	if cookie, err := r.Cookie("login-name"); err == nil {
-		value := make(map[string]string)
-		if err = sc.Decode("login-name", cookie.Value, &value); err == nil {
-			Author = value["username"]
-		}
-	}
 	if Author != "" && Content != "" {
 		// add new comment
 		Comment{
@@ -113,9 +119,26 @@ func CommentList(w http.ResponseWriter, r *http.Request) {
 		}.Insert()
 	}
 	var thePost Post
-	thePost.CurrentUser = Author
 	thePost.Comments = GetComments()
 	templates.ExecuteTemplate(w, "CommentList", thePost)
+}
+
+// Boards is the wip bulletin board
+func Boards(w http.ResponseWriter, r *http.Request) {
+	Author := GetSecureUsername(r)
+	Content := r.FormValue("Content")
+	if Author != "" && Content != "" {
+		// add new comment
+		Post{
+			Author:      Author,
+			Content:     Content,
+			CreatedTime: time.Now(),
+		}.Insert()
+	}
+	var mainpage MessageBoard
+	mainpage.CurrentUser = Author
+	mainpage.Posts = GetPosts(Author)
+	templates.ExecuteTemplate(w, "MessageBoard", mainpage)
 }
 
 // Test is a test of image generation

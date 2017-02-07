@@ -1,6 +1,6 @@
 package main
 
-// this is my Go plaground!! :)
+// this is my new Go plaground!! :)
 
 import (
 	"html/template"
@@ -40,6 +40,7 @@ func main() {
 	router.HandleFunc("/game", GameStart)
 	router.HandleFunc("/game/{gamestate}", Game)
 	router.HandleFunc("/commentlist", CommentList)
+	router.HandleFunc("/boards", Boards)
 	router.HandleFunc("/test", Test)
 	log.Fatal(http.ListenAndServe(":8080", LowerCaseURI(router)))
 }

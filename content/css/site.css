@@ -14,7 +14,12 @@ body {
     border-radius: 15px;
     margin-bottom: 15px;
 }
-
+.comment {
+    padding: 8px;
+}
+#edit-box {
+    display: none;
+}
 .author {
     color: orange;
     display: inline-block;
@@ -31,7 +36,13 @@ body {
 .errors {
     color: red;
 }
-.nav-links {
+
+.control-link {
+    display: inline-block;
+    font-size: 90%;
+    margin: 0px 8px;
+    color: indianred;
+    cursor: pointer;
 }
 
 .nav-link {

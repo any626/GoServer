@@ -20,6 +20,9 @@ body {
 #edit-box {
     display: none;
 }
+#reply-box {
+    display: none;
+}
 .author {
     color: orange;
     display: inline-block;
@@ -32,11 +35,24 @@ body {
     font-size: 90%;
     padding-left: 5px;
 }
-
+.post-new {
+    background-color: #242424;
+    border-radius: 15px;
+    padding: 15px;
+}
+.post-reply {
+    background-color: #242424;
+    border-radius: 15px;
+    padding: 15px;
+    margin-bottom: 15px;
+    margin-left: 15px;
+}
 .errors {
     color: red;
 }
-
+.cancel-button {
+    color: black;
+}
 .control-link {
     display: inline-block;
     font-size: 90%;

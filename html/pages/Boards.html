@@ -7,14 +7,29 @@
         <div class="form-group col-sm-12">
             <textarea class="form-control edit-content" rows="5" name="Content"></textarea>
         </div>
-        <div class="form-group col-sm-12">
-            <input type="submit" class="btn btn-secondary wide" value="save">
+        <div class="form-group col-sm-12 cancel-container">
+            <input type="submit" class="btn btn-secondary" value="Save">
+            <button type="button" class="btn btn-secondary edit-cancel-button">Cancel</button>
         </div>
     </form>
 </div>
+<div id="reply-box">
+    <div class="post-reply">
+        <form action="/reply" method="post" class="row">
+            <div class="form-group col-sm-12">
+                <label>Reply</label>
+                <textarea class="form-control" rows="3" name="Content" placeholder="..."></textarea>
+            </div>
+            <div class="form-group col-sm-12">
+                <input type="submit" class="btn btn-secondary" value="Reply">
+                <button type="button" class="btn btn-secondary reply-cancel-button">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
 <div>
     <div class="row">
-        <div class="col-sm-4">
+        <div class="post-new col-sm-4">
             <form action="/boards" method="post" class="row">
                 <div class="form-group col-sm-12">
                     <label>New Post</label>
@@ -26,7 +41,7 @@
             </form>
             <a class="btn btn-primary" href="/">Back to home</a>
         </div>
-        <div class="col-sm-8">
+        <div class="post-list col-sm-8">
         {{ with .Posts }}
             {{ range .}}
                 <div class="comment-box">

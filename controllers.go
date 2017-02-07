@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -139,6 +140,43 @@ func Boards(w http.ResponseWriter, r *http.Request) {
 	mainpage.CurrentUser = Author
 	mainpage.Posts = GetPosts(Author)
 	templates.ExecuteTemplate(w, "MessageBoard", mainpage)
+}
+
+// PostEdit edits posts
+func PostEdit(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	postID, _ := strconv.Atoi(vars["postid"])
+	Author := GetSecureUsername(r)
+	Content := r.FormValue("Content")
+	if Author != "" && Content != "" {
+		oldpost := GetPost(postID)
+		if oldpost.Author == Author {
+			// update comment
+			Post{
+				ID:      postID,
+				Content: Content,
+			}.UpdateContent()
+		}
+	}
+	http.Redirect(w, r, "/boards", 302)
+}
+
+// PostReply replies to posts
+func PostReply(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	postID, _ := strconv.Atoi(vars["postid"])
+	Author := GetSecureUsername(r)
+	Content := r.FormValue("Content")
+	if Author != "" && Content != "" {
+		Comment{
+			Author:      Author,
+			Content:     Content,
+			CreatedTime: time.Now(),
+			PostID:      postID,
+		}.Insert()
+
+	}
+	http.Redirect(w, r, "/boards", 302)
 }
 
 // Test is a test of image generation

@@ -104,7 +104,7 @@ func Disconnect() {
 
 // Insert a Comment
 func (comment Comment) Insert() {
-	_, err := db.Exec("INSERT INTO comments(author,content,created) VALUES($1,$2,$3)", comment.Author, comment.Content, comment.CreatedTime)
+	_, err := db.Exec("INSERT INTO comments(author,content,created,post_id,parent_comment) VALUES($1,$2,$3,$4,$5)", comment.Author, comment.Content, comment.CreatedTime, comment.PostID, comment.ParentID)
 	checkErr(err)
 }
 
@@ -133,6 +133,12 @@ func (post Post) Insert() {
 	checkErr(err)
 }
 
+// Update a Post
+func (post Post) UpdateContent() {
+	_, err := db.Exec("UPDATE posts SET content = $1 WHERE id = $2", post.Content, post.ID)
+	checkErr(err)
+}
+
 // GetPosts gets the posts
 func GetPosts(user string) []Post {
 	rows, err := db.Query("SELECT id,author,content,created FROM posts")
@@ -151,6 +157,15 @@ func GetPosts(user string) []Post {
 	checkErr(err)
 
 	return posts
+}
+
+// GetPost gets a post
+func GetPost(id int) Post {
+	row := db.QueryRow("SELECT author,content,created FROM posts WHERE id = $1", id)
+	var post Post
+	err := row.Scan(&post.Author, &post.Content, &post.CreatedTime)
+	checkErr(err)
+	return post
 }
 
 func friendlyString(duration time.Duration) string {

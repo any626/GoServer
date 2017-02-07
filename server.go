@@ -41,6 +41,8 @@ func main() {
 	router.HandleFunc("/game/{gamestate}", Game)
 	router.HandleFunc("/commentlist", CommentList)
 	router.HandleFunc("/boards", Boards)
+	router.HandleFunc("/post-edit/{postid}", PostEdit)
+	router.HandleFunc("/post-reply/{postid}", PostReply)
 	router.HandleFunc("/test", Test)
 	log.Fatal(http.ListenAndServe(":8080", LowerCaseURI(router)))
 }

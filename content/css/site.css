@@ -2,7 +2,9 @@ body {
     color: beige;
     background-color: black;
 }
-
+button {
+    color: black;
+}
 .header {
     background-color: #242424;
     padding: 15px;
@@ -15,10 +17,31 @@ body {
     margin-bottom: 15px;
 }
 .level1 {
-    margin-left: 15px;
+    margin-left: 30px;
 }
 .level2 {
-    margin-left: 30px;
+    margin-left: 60px;
+}
+.level3 {
+    margin-left: 90px;
+}
+.level4 {
+    margin-left: 120px;
+}
+.level5 {
+    margin-left: 150px;
+}
+.level6 {
+    margin-left: 180px;
+}
+.level7 {
+    margin-left: 210px;
+}
+.level8 {
+    margin-left: 240px;
+}
+.level9 {
+    margin-left: 270px;
 }
 .comment {
     padding: 8px;

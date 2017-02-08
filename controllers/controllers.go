@@ -142,6 +142,28 @@ func CommentList(w http.ResponseWriter, r *http.Request) {
 	templates.ExecuteTemplate(w, "CommentList", thePost)
 }
 
+func findRoot(data *map[int]*database.Comment, id int) int {
+	if elem, ok := (*data)[id]; ok {
+		if (*elem).ParentID != 0 {
+			findRoot(data, elem.ParentID)
+		} else {
+			return id
+		}
+	}
+	return 0
+}
+
+func recGetComs(list []database.Comment, parentID int) []database.Comment {
+	var comments []database.Comment
+	for _, c := range list {
+		if c.ParentID == parentID {
+			c.Comments = recGetComs(list, c.ID)
+			comments = append(comments, c)
+		}
+	}
+	return comments
+}
+
 // Boards is the wip bulletin board
 func Boards(w http.ResponseWriter, r *http.Request) {
 	Author := GetSecureUsername(r)
@@ -163,37 +185,24 @@ func Boards(w http.ResponseWriter, r *http.Request) {
 	for index := range mainpage.Posts {
 		mainpage.Posts[index].IsOwnPost = Author == mainpage.Posts[index].Author
 	}
-	lookup := make(map[int]database.Comment)
 	comments := database.GetComments()
 	for index := range comments {
 		comments[index].IsOwnComment = Author == comments[index].Author
-		if elem, ok := lookup[comments[index].ID]; ok {
-			elem.Author = comments[index].Author
-			elem.Content = comments[index].Content
-			elem.CreatedTime = comments[index].CreatedTime
-			elem.EditedTime = comments[index].EditedTime
-			elem.UpdatedTime = comments[index].UpdatedTime
-			lookup[comments[index].ID] = elem
-		} else {
-			lookup[comments[index].ID] = comments[index]
-		}
-		if comments[index].ParentID == 0 {
+	}
+	for _, comment := range comments {
+		// sorted already
+		if comment.ParentID == 0 {
 			for pindex := range mainpage.Posts {
-				if mainpage.Posts[pindex].ID == comments[index].PostID {
-					mainpage.Posts[pindex].Comments = append(mainpage.Posts[pindex].Comments, comments[index])
+				if mainpage.Posts[pindex].ID == comment.PostID {
+					comment.Comments = recGetComs(comments, comment.ID)
+					mainpage.Posts[pindex].Comments = append(mainpage.Posts[pindex].Comments, comment)
 					break
 				}
 			}
-		} else {
-			if elem, ok := lookup[comments[index].ParentID]; ok {
-				elem.Comments = append(elem.Comments, comments[index])
-			} else {
-				parent := database.Comment{}
-				lookup[comments[index].ParentID] = parent
-				parent.Comments = append(parent.Comments, comments[index])
-			}
 		}
 	}
+
+	util.PrettyPrint(mainpage)
 	templates.ExecuteTemplate(w, "MessageBoard", mainpage)
 }
 
@@ -247,7 +256,8 @@ func PostReply(w http.ResponseWriter, r *http.Request) {
 		}
 	} else {
 		if Author != "" && Content != "" {
-			parent, _ := strconv.Atoi(thingType)
+			parent := postID
+			postID, _ = strconv.Atoi(thingType)
 			now := time.Now()
 			database.Comment{
 				Author:      Author,

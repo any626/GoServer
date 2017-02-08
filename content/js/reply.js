@@ -2,6 +2,7 @@ $(function(){
     $('.reply').click(function () {
         var $this = $(this);
         $this.parent().parent().after($('#reply-box').html());
+        $this.parent().parent().next('.post-reply').children('form').children('div').children('textarea').focus();
         $this.parent().parent().next('.post-reply').children('form').attr('action', function(i, value) {
             var type = $this.attr('data-type') == "post" ? "post" : $this.attr('data-parent');
             return value + type + "/" + $this.attr('data-id');
@@ -15,6 +16,7 @@ $(function(){
         var oldContent = comment.html();
         comment.replaceWith($('#edit-box').html())
         var $this = $(this);
+        $this.parent().parent().children('form').children('div').children('textarea').focus();
         $this.parent().prev().children(':first-child').children('.edit-content').html(oldContent);
         $this.parent().prev().children(':last-child').children('.edit-cancel-button').attr('data-oldContent',oldContent);
         $this.parent().parent().children('form').attr('action', function(i, value) {

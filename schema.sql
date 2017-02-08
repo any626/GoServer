@@ -44,7 +44,9 @@ CREATE TABLE comments (
     author character varying,
     content character varying,
     post_id integer,
-    parent_comment integer
+    parent_comment integer,
+    edited timestamp with time zone NOT NULL,
+    updated timestamp with time zone NOT NULL
 );
 
 
@@ -79,7 +81,9 @@ CREATE TABLE posts (
     id integer NOT NULL,
     author character varying NOT NULL,
     content character varying NOT NULL,
-    created timestamp with time zone NOT NULL
+    created timestamp with time zone NOT NULL,
+    edited timestamp with time zone NOT NULL,
+    updated timestamp with time zone NOT NULL
 );
 
 

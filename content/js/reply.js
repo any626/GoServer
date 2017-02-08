@@ -3,7 +3,8 @@ $(function(){
         var $this = $(this);
         $this.parent().parent().after($('#reply-box').html());
         $this.parent().parent().next('.post-reply').children('form').attr('action', function(i, value) {
-            return value + $this.attr('data-id');
+            var type = $this.attr('data-type') == "post" ? "post" : $this.attr('data-parent');
+            return value + type + "/" + $this.attr('data-id');
         });
     });
     $('.post-list').on("click", ".reply-cancel-button", function(){
@@ -17,7 +18,7 @@ $(function(){
         $this.parent().prev().children(':first-child').children('.edit-content').html(oldContent);
         $this.parent().prev().children(':last-child').children('.edit-cancel-button').attr('data-oldContent',oldContent);
         $this.parent().parent().children('form').attr('action', function(i, value) {
-            return value + $this.attr('data-id');
+            return value + $this.attr('data-type') + "/" + $this.attr('data-id');
         });
     });
     $('.post-list').on("click", ".edit-cancel-button", function(){

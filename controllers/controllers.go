@@ -1,14 +1,30 @@
-package main
+package controllers
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
 	"strconv"
 	"time"
 
+	"github.com/brwhale/GoServer/database"
+	"github.com/brwhale/GoServer/drawing"
+	"github.com/brwhale/GoServer/util"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/securecookie"
 	"golang.org/x/crypto/bcrypt"
 )
+
+var sc *securecookie.SecureCookie
+var layouts = template.Must(template.ParseGlob("html/layout/*"))
+var templates = template.Must(layouts.ParseGlob("html/pages/*"))
+
+// GenerateSecureCookie gets new crypto
+func GenerateSecureCookie() {
+	var hashKey = securecookie.GenerateRandomKey(64)
+	var blockKey = securecookie.GenerateRandomKey(32)
+	sc = securecookie.New(hashKey, blockKey)
+}
 
 // GetSecureUsername from secure cookie
 func GetSecureUsername(r *http.Request) string {
@@ -63,7 +79,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	Password := r.FormValue("Password")
 	val := validation{Errors: false}
 	if Username != "" && Password != "" {
-		id := ValidatePassword(Username, Password)
+		id := database.ValidatePassword(Username, Password)
 		if id >= 0 {
 			FinalizeLogin(Username, w, r)
 		}
@@ -84,8 +100,8 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	val := validation{Errors: false}
 	if Username != "" && Password != "" {
 		hash, err := bcrypt.GenerateFromPassword([]byte(Password), bcrypt.DefaultCost)
-		checkErr(err)
-		id := User{Name: Username, Hash: string(hash)}.Insert()
+		util.Check(err)
+		id := database.User{Name: Username, Hash: string(hash)}.Insert()
 		if id >= 0 {
 			FinalizeLogin(Username, w, r)
 		}
@@ -103,7 +119,7 @@ func GameStart(w http.ResponseWriter, r *http.Request) {
 // Game is the dynamic game pages
 func Game(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	page := &Page{Title: vars["gamestate"]}
+	page := &database.Page{Title: vars["gamestate"]}
 	templates.ExecuteTemplate(w, "Game", page)
 }
 
@@ -113,14 +129,16 @@ func CommentList(w http.ResponseWriter, r *http.Request) {
 	Content := r.FormValue("Content")
 	if Author != "" && Content != "" {
 		// add new comment
-		Comment{
+		now := time.Now()
+		database.Comment{
 			Author:      Author,
 			Content:     Content,
-			CreatedTime: time.Now(),
+			CreatedTime: now,
+			EditedTime:  now,
 		}.Insert()
 	}
-	var thePost Post
-	thePost.Comments = GetComments()
+	var thePost database.Post
+	thePost.Comments = database.GetComments()
 	templates.ExecuteTemplate(w, "CommentList", thePost)
 }
 
@@ -129,16 +147,53 @@ func Boards(w http.ResponseWriter, r *http.Request) {
 	Author := GetSecureUsername(r)
 	Content := r.FormValue("Content")
 	if Author != "" && Content != "" {
-		// add new comment
-		Post{
+		// add new post
+		now := time.Now()
+		database.Post{
 			Author:      Author,
 			Content:     Content,
-			CreatedTime: time.Now(),
+			CreatedTime: now,
+			EditedTime:  now,
+			UpdatedTime: now,
 		}.Insert()
 	}
-	var mainpage MessageBoard
+	var mainpage database.MessageBoard
 	mainpage.CurrentUser = Author
-	mainpage.Posts = GetPosts(Author)
+	mainpage.Posts = database.GetPosts()
+	for index := range mainpage.Posts {
+		mainpage.Posts[index].IsOwnPost = Author == mainpage.Posts[index].Author
+	}
+	lookup := make(map[int]database.Comment)
+	comments := database.GetComments()
+	for index := range comments {
+		comments[index].IsOwnComment = Author == comments[index].Author
+		if elem, ok := lookup[comments[index].ID]; ok {
+			elem.Author = comments[index].Author
+			elem.Content = comments[index].Content
+			elem.CreatedTime = comments[index].CreatedTime
+			elem.EditedTime = comments[index].EditedTime
+			elem.UpdatedTime = comments[index].UpdatedTime
+			lookup[comments[index].ID] = elem
+		} else {
+			lookup[comments[index].ID] = comments[index]
+		}
+		if comments[index].ParentID == 0 {
+			for pindex := range mainpage.Posts {
+				if mainpage.Posts[pindex].ID == comments[index].PostID {
+					mainpage.Posts[pindex].Comments = append(mainpage.Posts[pindex].Comments, comments[index])
+					break
+				}
+			}
+		} else {
+			if elem, ok := lookup[comments[index].ParentID]; ok {
+				elem.Comments = append(elem.Comments, comments[index])
+			} else {
+				parent := database.Comment{}
+				lookup[comments[index].ParentID] = parent
+				parent.Comments = append(parent.Comments, comments[index])
+			}
+		}
+	}
 	templates.ExecuteTemplate(w, "MessageBoard", mainpage)
 }
 
@@ -146,16 +201,26 @@ func Boards(w http.ResponseWriter, r *http.Request) {
 func PostEdit(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	postID, _ := strconv.Atoi(vars["postid"])
+	thingType := vars["type"]
 	Author := GetSecureUsername(r)
 	Content := r.FormValue("Content")
 	if Author != "" && Content != "" {
-		oldpost := GetPost(postID)
-		if oldpost.Author == Author {
-			// update comment
-			Post{
-				ID:      postID,
-				Content: Content,
-			}.UpdateContent()
+		if thingType == "comment" {
+			oldcomment := database.GetComment(postID)
+			if oldcomment.Author == Author {
+				database.Comment{
+					ID:      postID,
+					Content: Content,
+				}.UpdateContent()
+			}
+		} else if thingType == "post" {
+			oldpost := database.GetPost(postID)
+			if oldpost.Author == Author {
+				database.Post{
+					ID:      postID,
+					Content: Content,
+				}.UpdateContent()
+			}
 		}
 	}
 	http.Redirect(w, r, "/boards", 302)
@@ -165,21 +230,40 @@ func PostEdit(w http.ResponseWriter, r *http.Request) {
 func PostReply(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	postID, _ := strconv.Atoi(vars["postid"])
+	thingType := vars["type"]
 	Author := GetSecureUsername(r)
 	Content := r.FormValue("Content")
-	if Author != "" && Content != "" {
-		Comment{
-			Author:      Author,
-			Content:     Content,
-			CreatedTime: time.Now(),
-			PostID:      postID,
-		}.Insert()
-
+	if thingType == "post" {
+		if Author != "" && Content != "" {
+			now := time.Now()
+			database.Comment{
+				Author:      Author,
+				Content:     Content,
+				CreatedTime: now,
+				EditedTime:  now,
+				UpdatedTime: now,
+				PostID:      postID,
+			}.Insert()
+		}
+	} else {
+		if Author != "" && Content != "" {
+			parent, _ := strconv.Atoi(thingType)
+			now := time.Now()
+			database.Comment{
+				Author:      Author,
+				Content:     Content,
+				CreatedTime: now,
+				EditedTime:  now,
+				UpdatedTime: now,
+				PostID:      postID,
+				ParentID:    parent,
+			}.Insert()
+		}
 	}
 	http.Redirect(w, r, "/boards", 302)
 }
 
 // Test is a test of image generation
 func Test(w http.ResponseWriter, r *http.Request) {
-	GetImage(w)
+	drawing.GetImage(w)
 }

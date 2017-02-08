@@ -14,8 +14,15 @@ body {
     border-radius: 15px;
     margin-bottom: 15px;
 }
+.level1 {
+    margin-left: 15px;
+}
+.level2 {
+    margin-left: 30px;
+}
 .comment {
     padding: 8px;
+    white-space: pre-wrap;
 }
 #edit-box {
     display: none;

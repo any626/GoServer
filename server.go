@@ -3,47 +3,35 @@ package main
 // this is my new Go plaground!! :)
 
 import (
-	"html/template"
 	"io"
 	"log"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/brwhale/GoServer/controllers"
+	"github.com/brwhale/GoServer/database"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/securecookie"
 	_ "github.com/lib/pq"
 )
 
-var layouts = template.Must(template.ParseGlob("html/layout/*"))
-var templates = template.Must(layouts.ParseGlob("html/pages/*"))
-var sc *securecookie.SecureCookie
-
-func checkErr(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
 func main() {
-	var hashKey = securecookie.GenerateRandomKey(64)
-	var blockKey = securecookie.GenerateRandomKey(32)
-	sc = securecookie.New(hashKey, blockKey)
-	Connect()
-	defer Disconnect()
+	controllers.GenerateSecureCookie()
+	database.Connect()
+	defer database.Disconnect()
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/content/{type}/{filename}", StaticHandler)
-	router.HandleFunc("/", Index)
-	router.HandleFunc("/login", Login)
-	router.HandleFunc("/logout", Logout)
-	router.HandleFunc("/register", Register)
-	router.HandleFunc("/game", GameStart)
-	router.HandleFunc("/game/{gamestate}", Game)
-	router.HandleFunc("/commentlist", CommentList)
-	router.HandleFunc("/boards", Boards)
-	router.HandleFunc("/post-edit/{postid}", PostEdit)
-	router.HandleFunc("/post-reply/{postid}", PostReply)
-	router.HandleFunc("/test", Test)
+	router.HandleFunc("/", controllers.Index)
+	router.HandleFunc("/login", controllers.Login)
+	router.HandleFunc("/logout", controllers.Logout)
+	router.HandleFunc("/register", controllers.Register)
+	router.HandleFunc("/game", controllers.GameStart)
+	router.HandleFunc("/game/{gamestate}", controllers.Game)
+	router.HandleFunc("/commentlist", controllers.CommentList)
+	router.HandleFunc("/boards", controllers.Boards)
+	router.HandleFunc("/post-edit/{type}/{postid}", controllers.PostEdit)
+	router.HandleFunc("/post-reply/{type}/{postid}", controllers.PostReply)
+	router.HandleFunc("/test", controllers.Test)
 	log.Fatal(http.ListenAndServe(":8080", LowerCaseURI(router)))
 }
 

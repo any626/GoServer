@@ -1,5 +1,6 @@
 {{ define "MessageBoard" }}
 {{ template "header" }}
+{{ $posts := .Posts }}
 <script src="/content/js/reply.js"></script>
 <h1>Posts</h1>
 <div id="edit-box">
@@ -42,21 +43,45 @@
             <a class="btn btn-primary" href="/">Back to home</a>
         </div>
         <div class="post-list col-sm-8">
-        {{ with .Posts }}
-            {{ range .}}
+            {{ range $post := $posts }}            
                 <div class="comment-box">
                     <div>
-                        <div class="author">{{ .Author }}</div>
-                        <div class="timestamp">{{ .DisplayTime }}</div>
+                        <div class="author">{{ $post.Author }}</div>
+                        <div class="timestamp">{{ $post.DisplayTime }}</div>
                     </div>
-                    <div class="comment">{{ .Content }}</div>
+                    <div class="comment">{{ $post.Content }}</div>
                     <div>
-                        {{ if .IsOwnPost }}<div class="control-link edit" data-id="{{.ID}}">edit</div>{{ end }}
-                        <div class="control-link reply" data-id="{{.ID}}">reply</div>
+                        {{ if $post.IsOwnPost }}<div class="control-link edit" data-type="post" data-id="{{$post.ID}}">edit</div>{{ end }}
+                        <div class="control-link reply" data-type="post" data-id="{{$post.ID}}">reply</div>
                     </div>                 
                 </div>
+                {{ range $comment := $post.Comments }}
+                    <div class="comment-box level1">
+                        <div>
+                            <div class="author">{{ $comment.Author }}</div>
+                            <div class="timestamp">{{ $comment.DisplayTime }}</div>
+                        </div>
+                        <div class="comment">{{ $comment.Content }}</div>
+                        <div>
+                            {{ if $comment.IsOwnComment }}<div class="control-link edit" data-type="comment" data-id="{{$comment.ID}}">edit</div>{{ end }}
+                            <div class="control-link reply" data-type="comment" data-parent="{{$post.ID}}" data-id="{{$comment.ID}}">reply</div>
+                        </div>               
+                    </div>
+                    {{ range $commenttwo := $comment.Comments }}
+                        <div class="comment-box level2">
+                            <div>
+                                <div class="author">{{ $commenttwo.Author }}</div>
+                                <div class="timestamp">{{ $commenttwo.DisplayTime }}</div>
+                            </div>
+                            <div class="comment">{{ $commenttwo.Content }}</div> 
+                            <div>
+                                {{ if $commenttwo.IsOwnComment }}<div class="control-link edit" data-type="comment" data-id="{{$commenttwo.ID}}">edit</div>{{ end }}
+                                <div class="control-link reply" data-type="comment" data-parent="{{$comment.ID}}" data-id="{{$commenttwo.ID}}">reply</div>
+                            </div>       
+                        </div>
+                    {{ end }}
+                {{ end }}
             {{ end }}
-        {{ end }}
         </div>
     </div>
 </div>

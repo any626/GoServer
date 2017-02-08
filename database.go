@@ -133,7 +133,7 @@ func (post Post) Insert() {
 	checkErr(err)
 }
 
-// Update a Post
+// UpdateContent of a Post
 func (post Post) UpdateContent() {
 	_, err := db.Exec("UPDATE posts SET content = $1 WHERE id = $2", post.Content, post.ID)
 	checkErr(err)

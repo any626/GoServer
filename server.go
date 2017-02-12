@@ -16,9 +16,10 @@ import (
 )
 
 func main() {
-	controllers.GenerateSecureCookie()
 	database.Connect()
 	defer database.Disconnect()
+	database.GenerateSecureCookie()
+
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/content/{type}/{filename}", StaticHandler)
 	router.HandleFunc("/", controllers.Index)
@@ -27,11 +28,11 @@ func main() {
 	router.HandleFunc("/register", controllers.Register)
 	router.HandleFunc("/game", controllers.GameStart)
 	router.HandleFunc("/game/{gamestate}", controllers.Game)
-	router.HandleFunc("/commentlist", controllers.CommentList)
 	router.HandleFunc("/boards", controllers.Boards)
 	router.HandleFunc("/post-edit/{type}/{postid}", controllers.PostEdit)
 	router.HandleFunc("/post-reply/{type}/{postid}", controllers.PostReply)
 	router.HandleFunc("/test", controllers.Test)
+
 	log.Fatal(http.ListenAndServe(":8080", LowerCaseURI(router)))
 }
 

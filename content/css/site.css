@@ -16,10 +16,10 @@ button {
 }
 .comment-box {
     background-color: #0c0c0c;
-    padding-left: 5px;
+    padding-left: 8px;
     padding-top: 8px;
     border-radius: 15px 0px 0px 15px;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     margin-left: 8px;
 }
 .comment-dark {
@@ -33,7 +33,7 @@ button {
 }
 .post-box {
     background-color: #111;
-    padding-left: 5px;
+    padding-left: 8px;
     padding-top: 8px;
     border-radius: 15px;
     margin-bottom: 10px;

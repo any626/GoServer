@@ -21,17 +21,6 @@ type DbConfig struct {
 	DbName   string
 }
 
-// Page is some underused bs right now
-type Page struct {
-	Title string
-}
-
-// MessageBoard is a container for posts
-type MessageBoard struct {
-	CurrentUser string
-	Posts       []Post
-}
-
 // Connect to database
 func Connect() {
 	// read credentials from config file

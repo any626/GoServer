@@ -1,8 +1,6 @@
 package database
 
 import (
-	"net/http"
-
 	"fmt"
 
 	"github.com/gorilla/securecookie"
@@ -24,19 +22,12 @@ func GenerateSecureCookie() {
 	sc = securecookie.New(hashKey, blockKey)
 }
 
-// GetSecureUsername from secure cookie
-func GetSecureUsername(r *http.Request) string {
-	Username := ""
-	if cookie, err := r.Cookie("login-name"); err == nil {
-		value := make(map[string]string)
-		if err = sc.Decode("login-name", cookie.Value, &value); err == nil {
-			Username = value["username"]
-		}
-	}
-	return Username
-}
-
 // SecureEncode encodes with our secure cookie
 func SecureEncode(name string, value interface{}) (string, error) {
 	return sc.Encode(name, value)
+}
+
+// SecureDecode decodes with our secure cookie
+func SecureDecode(name, value string, dest interface{}) error {
+	return sc.Decode(name, value, dest)
 }

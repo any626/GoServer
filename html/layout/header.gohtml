@@ -19,10 +19,13 @@
         <a class="nav-link" href="/game">Game</a>
         <a class="nav-link" href="https://katagames.tumblr.com">Blog</a>
         <a class="nav-link" href="/boards">Message Board</a>
-        <a class="nav-link login" style="display: none;" href="/register">Register</a>
-        <a class="nav-link login" style="display: none;" href="/login">Login</a>
-        <a id="account" class="nav-link" href="">Account</a>
-        <a id="logout" class="nav-link" href="/logout">Logout</a>
+        {{ if eq (len .CurrentUser) 0 }}
+            <a class="nav-link login" href="/register">Register</a>
+            <a class="nav-link login" href="/login">Login</a>            
+        {{ else }}
+            <a class="nav-link" id="account" href="">{{.CurrentUser}}</a>
+            <a class="nav-link" id="logout" href="/logout">Logout</a>
+        {{ end }}        
     </div>
 </div>
 <div class="container">

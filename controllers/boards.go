@@ -11,7 +11,7 @@ import (
 
 // Boards is the wip bulletin board
 func Boards(w http.ResponseWriter, r *http.Request) {
-	Author := database.GetSecureUsername(r)
+	Author := GetSecureUsername(r)
 	Content := r.FormValue("Content")
 	if Author != "" && Content != "" {
 		// add new post
@@ -24,7 +24,7 @@ func Boards(w http.ResponseWriter, r *http.Request) {
 			UpdatedTime: now,
 		}.Insert()
 	}
-	var mainpage database.MessageBoard
+	var mainpage MessageBoard
 	mainpage.CurrentUser = Author
 	mainpage.Posts = database.GetPosts()
 	for index := range mainpage.Posts {
@@ -54,7 +54,7 @@ func PostEdit(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	postID, _ := strconv.Atoi(vars["postid"])
 	thingType := vars["type"]
-	Author := database.GetSecureUsername(r)
+	Author := GetSecureUsername(r)
 	Content := r.FormValue("Content")
 	if Author != "" && Content != "" {
 		if thingType == "comment" {
@@ -83,7 +83,7 @@ func PostReply(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	postID, _ := strconv.Atoi(vars["postid"])
 	thingType := vars["type"]
-	Author := database.GetSecureUsername(r)
+	Author := GetSecureUsername(r)
 	Content := r.FormValue("Content")
 	if thingType == "post" {
 		if Author != "" && Content != "" {

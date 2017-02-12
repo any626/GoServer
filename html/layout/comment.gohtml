@@ -1,0 +1,31 @@
+{{ define "commentinterior"}}
+    <div class="comment-header">
+        <div class="author">{{ .Author }}</div>
+        <div class="timestamp">{{ .DisplayTime }}</div>
+    </div>
+    <div>
+        <div class="comment">{{ .Content }}</div>
+        <div class="link-line">
+            {{ if .IsOwnComment }}<div class="control-link edit" data-type="comment" data-id="{{.ID}}">edit</div>{{ end }}
+            <div class="control-link reply" data-type="comment" data-parent="{{.PostID}}" data-id="{{.ID}}">reply</div>
+        </div>
+{{ end }}
+{{ define "comment" }}
+    <div class="comment-box">
+        {{ template "commentinterior" .}}
+            {{ range $comment := .Comments }}
+                {{ template "commentdark" $comment}}
+            {{ end }}
+        </div>
+    </div>
+{{ end }}
+{{ define "commentdark" }}
+    <div class="comment-box comment-dark">
+        {{ template "commentinterior" .}}
+            {{ range $comment := .Comments }}
+                {{ template "comment" $comment}}
+            {{ end }}
+        </div>
+    </div>
+{{ end }}
+

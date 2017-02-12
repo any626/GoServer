@@ -44,134 +44,20 @@
         </div>
         <div class="post-list col-sm-8">
             {{ range $post := $posts }}            
-                <div class="comment-box">
-                    <div>
+                <div class="post-box">
+                    <div class="comment-header">
                         <div class="author">{{ $post.Author }}</div>
                         <div class="timestamp">{{ $post.DisplayTime }}</div>
                     </div>
                     <div class="comment">{{ $post.Content }}</div>
-                    <div>
+                    <div class="link-line">
                         {{ if $post.IsOwnPost }}<div class="control-link edit" data-type="post" data-id="{{$post.ID}}">edit</div>{{ end }}
                         <div class="control-link reply" data-type="post" data-id="{{$post.ID}}">reply</div>
-                    </div>                 
-                </div>
-                {{ range $comment := $post.Comments }}
-                    <div class="comment-box level1">
-                        <div>
-                            <div class="author">{{ $comment.Author }}</div>
-                            <div class="timestamp">{{ $comment.DisplayTime }}</div>
-                        </div>
-                        <div class="comment">{{ $comment.Content }}</div>
-                        <div>
-                            {{ if $comment.IsOwnComment }}<div class="control-link edit" data-type="comment" data-id="{{$comment.ID}}">edit</div>{{ end }}
-                            <div class="control-link reply" data-type="comment" data-parent="{{$post.ID}}" data-id="{{$comment.ID}}">reply</div>
-                        </div>               
-                    </div>
-                    {{ range $comment2 := $comment.Comments }}
-                        <div class="comment-box level2">
-                            <div>
-                                <div class="author">{{ $comment2.Author }}</div>
-                                <div class="timestamp">{{ $comment2.DisplayTime }}</div>
-                            </div>
-                            <div class="comment">{{ $comment2.Content }}</div> 
-                            <div>
-                                {{ if $comment2.IsOwnComment }}<div class="control-link edit" data-type="comment" data-id="{{$comment2.ID}}">edit</div>{{ end }}
-                                <div class="control-link reply" data-type="comment" data-parent="{{$post.ID}}" data-id="{{$comment2.ID}}">reply</div>
-                            </div>       
-                        </div>
-                        {{ range $comment3 := $comment2.Comments }}
-                            <div class="comment-box level3">
-                                <div>
-                                    <div class="author">{{ $comment3.Author }}</div>
-                                    <div class="timestamp">{{ $comment3.DisplayTime }}</div>
-                                </div>
-                                <div class="comment">{{ $comment3.Content }}</div> 
-                                <div>
-                                    {{ if $comment3.IsOwnComment }}<div class="control-link edit" data-type="comment" data-id="{{$comment3.ID}}">edit</div>{{ end }}
-                                    <div class="control-link reply" data-type="comment" data-parent="{{$post.ID}}" data-id="{{$comment3.ID}}">reply</div>
-                                </div>       
-                            </div>
-                            {{ range $comment4 := $comment3.Comments }}
-                                <div class="comment-box level4">
-                                    <div>
-                                        <div class="author">{{ $comment4.Author }}</div>
-                                        <div class="timestamp">{{ $comment4.DisplayTime }}</div>
-                                    </div>
-                                    <div class="comment">{{ $comment4.Content }}</div> 
-                                    <div>
-                                        {{ if $comment4.IsOwnComment }}<div class="control-link edit" data-type="comment" data-id="{{$comment4.ID}}">edit</div>{{ end }}
-                                        <div class="control-link reply" data-type="comment" data-parent="{{$post.ID}}" data-id="{{$comment4.ID}}">reply</div>
-                                    </div>       
-                                </div>
-                                {{ range $comment5 := $comment4.Comments }}
-                                    <div class="comment-box level5">
-                                        <div>
-                                            <div class="author">{{ $comment5.Author }}</div>
-                                            <div class="timestamp">{{ $comment5.DisplayTime }}</div>
-                                        </div>
-                                        <div class="comment">{{ $comment5.Content }}</div> 
-                                        <div>
-                                            {{ if $comment5.IsOwnComment }}<div class="control-link edit" data-type="comment" data-id="{{$comment5.ID}}">edit</div>{{ end }}
-                                            <div class="control-link reply" data-type="comment" data-parent="{{$post.ID}}" data-id="{{$comment5.ID}}">reply</div>
-                                        </div>       
-                                    </div>
-                                    {{ range $comment6 := $comment5.Comments }}
-                                        <div class="comment-box level6">
-                                            <div>
-                                                <div class="author">{{ $comment6.Author }}</div>
-                                                <div class="timestamp">{{ $comment6.DisplayTime }}</div>
-                                            </div>
-                                            <div class="comment">{{ $comment6.Content }}</div> 
-                                            <div>
-                                                {{ if $comment6.IsOwnComment }}<div class="control-link edit" data-type="comment" data-id="{{$comment6.ID}}">edit</div>{{ end }}
-                                                <div class="control-link reply" data-type="comment" data-parent="{{$post.ID}}" data-id="{{$comment6.ID}}">reply</div>
-                                            </div>       
-                                        </div>
-                                        {{ range $comment7 := $comment6.Comments }}
-                                            <div class="comment-box level7">
-                                                <div>
-                                                    <div class="author">{{ $comment7.Author }}</div>
-                                                    <div class="timestamp">{{ $comment7.DisplayTime }}</div>
-                                                </div>
-                                                <div class="comment">{{ $comment7.Content }}</div> 
-                                                <div>
-                                                    {{ if $comment7.IsOwnComment }}<div class="control-link edit" data-type="comment" data-id="{{$comment7.ID}}">edit</div>{{ end }}
-                                                    <div class="control-link reply" data-type="comment" data-parent="{{$post.ID}}" data-id="{{$comment7.ID}}">reply</div>
-                                                </div>       
-                                            </div>
-                                            {{ range $comment8 := $comment7.Comments }}
-                                                <div class="comment-box level8">
-                                                    <div>
-                                                        <div class="author">{{ $comment8.Author }}</div>
-                                                        <div class="timestamp">{{ $comment8.DisplayTime }}</div>
-                                                    </div>
-                                                    <div class="comment">{{ $comment8.Content }}</div> 
-                                                    <div>
-                                                        {{ if $comment8.IsOwnComment }}<div class="control-link edit" data-type="comment" data-id="{{$comment8.ID}}">edit</div>{{ end }}
-                                                        <div class="control-link reply" data-type="comment" data-parent="{{$post.ID}}" data-id="{{$comment8.ID}}">reply</div>
-                                                    </div>       
-                                                </div>
-                                                {{ range $comment9 := $comment8.Comments }}
-                                                    <div class="comment-box level9">
-                                                        <div>
-                                                            <div class="author">{{ $comment9.Author }}</div>
-                                                            <div class="timestamp">{{ $comment9.DisplayTime }}</div>
-                                                        </div>
-                                                        <div class="comment">{{ $comment9.Content }}</div> 
-                                                        <div>
-                                                            {{ if $comment9.IsOwnComment }}<div class="control-link edit" data-type="comment" data-id="{{$comment9.ID}}">edit</div>{{ end }}
-                                                            <div class="control-link reply" data-type="comment" data-parent="{{$post.ID}}" data-id="{{$comment9.ID}}">reply</div>
-                                                        </div>       
-                                                    </div>
-                                                {{ end }}
-                                            {{ end }}
-                                        {{ end }}
-                                    {{ end }}
-                                {{ end }}
-                            {{ end }}
-                        {{ end }}
-                    {{ end }}
-                {{ end }}
+                    </div>  
+                    {{ range $comment := $post.Comments }}
+                        {{ template "comment" $comment}}
+                    {{ end }}               
+                </div>                
             {{ end }}
         </div>
     </div>

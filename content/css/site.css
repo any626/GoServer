@@ -6,42 +6,37 @@ button {
     color: black;
 }
 .header {
-    background-color: #242424;
+    background-color: #111;
     padding: 15px;
     text-align: center;
 }
+.colorbar {
+    background-color: #ab4;
+    width: 4px;
+}
 .comment-box {
-    background-color: #242424;
-    padding: 15px;
+    background-color: #0c0c0c;
+    padding-left: 5px;
+    padding-top: 8px;
+    border-radius: 15px 0px 0px 15px;
+    margin-bottom: 10px;
+    margin-left: 8px;
+}
+.comment-dark {
+    background-color: #111;
+}
+.comment-header {
+    padding-left: 8px;
+}
+.link-line {
+    padding-bottom: 8px;
+}
+.post-box {
+    background-color: #111;
+    padding-left: 5px;
+    padding-top: 8px;
     border-radius: 15px;
-    margin-bottom: 15px;
-}
-.level1 {
-    margin-left: 30px;
-}
-.level2 {
-    margin-left: 60px;
-}
-.level3 {
-    margin-left: 90px;
-}
-.level4 {
-    margin-left: 120px;
-}
-.level5 {
-    margin-left: 150px;
-}
-.level6 {
-    margin-left: 180px;
-}
-.level7 {
-    margin-left: 210px;
-}
-.level8 {
-    margin-left: 240px;
-}
-.level9 {
-    margin-left: 270px;
+    margin-bottom: 10px;
 }
 .comment {
     padding: 8px;
@@ -66,12 +61,12 @@ button {
     padding-left: 5px;
 }
 .post-new {
-    background-color: #242424;
+    background-color: #111;
     border-radius: 15px;
     padding: 15px;
 }
 .post-reply {
-    background-color: #242424;
+    background-color: #111;
     border-radius: 15px;
     padding: 15px;
     margin-bottom: 15px;
@@ -100,5 +95,5 @@ button {
 }
 
 textarea, input {
-    color: #242424;
+    color: #111;
 }

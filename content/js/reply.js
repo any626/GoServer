@@ -1,9 +1,9 @@
 $(function(){
     $('.reply').click(function () {
         var $this = $(this);
-        $this.parent().parent().after($('#reply-box').html());
-        $this.parent().parent().next('.post-reply').children('form').children('div').children('textarea').focus();
-        $this.parent().parent().next('.post-reply').children('form').attr('action', function(i, value) {
+        $this.parent().after($('#reply-box').html());
+        $this.parent().next('.post-reply').children('form').children('div').children('textarea').focus();
+        $this.parent().next('.post-reply').children('form').attr('action', function(i, value) {
             var type = $this.attr('data-type') == "post" ? "post" : $this.attr('data-parent');
             return value + type + "/" + $this.attr('data-id');
         });

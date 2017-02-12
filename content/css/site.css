@@ -10,6 +10,30 @@ button {
     padding: 15px;
     text-align: center;
 }
+#container {
+   min-height: 100vh;
+   position: relative;
+}
+.container{
+    padding-bottom: 100px;
+    padding-top: 8px;
+}
+.footer {
+    background-color: #111;
+    padding: 15px;
+    text-align: center;
+    position:absolute;
+    bottom: 0;
+    width: 100%;
+    height: 100px; 
+}
+.copyright {
+    color: #333;
+}
+.sub-footer {
+    padding-top: 25px;
+    padding-bottom: 5px;
+}
 .colorbar {
     background-color: #ab4;
     width: 4px;
@@ -97,7 +121,6 @@ button {
 .wide {
     width: 100%;
 }
-
 textarea, input {
     color: #111;
 }

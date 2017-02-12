@@ -53,7 +53,6 @@ button {
     display: inline-block;
     font-size: 110%;
 }
-
 .timestamp {
     color: mediumseagreen;
     display: inline-block;
@@ -69,14 +68,16 @@ button {
     background-color: #111;
     border-radius: 15px;
     padding: 15px;
-    margin-bottom: 15px;
-    margin-left: 15px;
+    padding-bottom: 0px;
 }
 .errors {
     color: red;
 }
 .cancel-button {
     color: black;
+}
+.cancel-container{
+    margin-bottom: 0px;
 }
 .control-link {
     display: inline-block;
@@ -85,7 +86,10 @@ button {
     color: indianred;
     cursor: pointer;
 }
-
+.edit-area {
+    padding-left: 8px;
+    padding-right: 8px;
+}
 .nav-link {
     padding: 15px;
 }

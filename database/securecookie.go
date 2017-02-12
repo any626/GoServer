@@ -3,6 +3,8 @@ package database
 import (
 	"net/http"
 
+	"fmt"
+
 	"github.com/gorilla/securecookie"
 )
 
@@ -10,8 +12,15 @@ var sc *securecookie.SecureCookie
 
 // GenerateSecureCookie gets new crypto
 func GenerateSecureCookie() {
-	var hashKey = securecookie.GenerateRandomKey(64)
-	var blockKey = securecookie.GenerateRandomKey(32)
+	row := db.QueryRow("SELECT hash,block FROM securecookie LIMIT 1")
+	var blockKey, hashKey []byte
+	err := row.Scan(&hashKey, &blockKey)
+	if err != nil {
+		fmt.Println("err not nil")
+		hashKey = securecookie.GenerateRandomKey(64)
+		blockKey = securecookie.GenerateRandomKey(32)
+		db.QueryRow("INSERT INTO securecookie(hash,block) VALUES($1,$2)", hashKey, blockKey)
+	}
 	sc = securecookie.New(hashKey, blockKey)
 }
 

@@ -14,7 +14,8 @@ func GenerateSecureCookie() {
 	var blockKey, hashKey []byte
 	err := row.Scan(&hashKey, &blockKey)
 	if err != nil {
-		fmt.Println("err not nil")
+		fmt.Println("SecureCookie not found, generating new SecureCookie.")
+		fmt.Println("All users will need to refresh their logins.")
 		hashKey = securecookie.GenerateRandomKey(64)
 		blockKey = securecookie.GenerateRandomKey(32)
 		db.QueryRow("INSERT INTO securecookie(hash,block) VALUES($1,$2)", hashKey, blockKey)

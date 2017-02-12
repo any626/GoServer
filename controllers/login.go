@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -47,7 +46,6 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		if id >= 0 {
 			FinalizeLogin(Username, w, r)
 		}
-		fmt.Println(id)
 		val.Errors = true
 	}
 	templates.ExecuteTemplate(w, "Register", val)

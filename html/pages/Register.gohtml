@@ -1,5 +1,6 @@
 {{ define "Register" }}
 {{ template "header" . }}
+<script src="/content/js/validate.js"></script>
 <h1>Register</h1>
 <div>
     <p>or <a href="/login">login</a></p>
@@ -12,13 +13,13 @@
     {{ end }}
     <form action="/register" method="post" class="row">
         <div class="form-group col-sm-12">
-            <input name="Username" type="text" class="form-control" placeholder="Name">
+            <input id="name" name="Username" type="text" class="form-control" placeholder="Name">
         </div>
         <div class="form-group col-sm-12">
-            <input name="Password" type="password" class="form-control" placeholder="Password">
+            <input id="pass" name="Password" type="password" class="form-control" placeholder="Password">
         </div>
         <div class="form-group col-sm-12">
-            <input type="submit" class="btn btn-secondary wide" value="Register">
+            <input id="submit" type="submit" class="btn btn-secondary wide" value="Register">
         </div>
     </form>
 </div>

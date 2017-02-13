@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"time"
 
+	"strings"
+
 	"github.com/brwhale/GoServer/database"
 	"github.com/brwhale/GoServer/util"
 	"golang.org/x/crypto/bcrypt"
@@ -22,6 +24,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	if Username != "" && Password != "" {
 		id := database.ValidatePassword(Username, Password)
 		if id >= 0 {
+			// redirect
 			FinalizeLogin(Username, w, r)
 		}
 		val.Errors = true
@@ -40,11 +43,19 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	Password := r.FormValue("Password")
 	val := validation{Errors: false, CurrentUser: GetSecureUsername(r)}
 	if Username != "" && Password != "" {
-		hash, err := bcrypt.GenerateFromPassword([]byte(Password), bcrypt.DefaultCost)
-		util.Check(err)
-		id := database.User{Name: Username, Hash: string(hash)}.Insert()
-		if id >= 0 {
-			FinalizeLogin(Username, w, r)
+		/*
+			Don't let people register names with these characters:
+			/ ? #
+			They don't work in URLs for "/user/{username}"
+		*/
+		if !strings.ContainsAny(Username, "/?#") && len(Password) > 9 {
+			hash, err := bcrypt.GenerateFromPassword([]byte(Password), bcrypt.DefaultCost)
+			util.Check(err)
+			id := database.User{Name: Username, Hash: string(hash)}.Insert()
+			if id >= 0 {
+				// redirect
+				FinalizeLogin(Username, w, r)
+			}
 		}
 		val.Errors = true
 	}

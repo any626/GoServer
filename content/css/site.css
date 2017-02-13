@@ -144,7 +144,9 @@ hr {
 .nav-link {
     padding: 15px;
 }
-
+.prewrap {
+    white-space: pre-wrap;
+}
 .wide {
     width: 100%;
 }

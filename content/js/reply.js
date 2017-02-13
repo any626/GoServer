@@ -27,4 +27,14 @@ $(function(){
         var oldContent = ($(this).attr('data-oldContent'));
         $(this).parent().parent().replaceWith('<div class="comment">'+oldContent+'</div>');
     });
+    $('.hider').click(function(){
+        var comment = $(this).parent().parent();
+        if (comment.hasClass("mini")){
+            $(this).html("[ - ]");
+            comment.removeClass("mini");
+        } else {
+            $(this).html("[ + ]");
+            comment.addClass("mini");
+        }
+    });
 });

@@ -3,6 +3,8 @@ package database
 import (
 	"time"
 
+	"github.com/brwhale/GoServer/util"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -12,6 +14,7 @@ type User struct {
 	Name, Email, Hash string
 	CreatedTime       time.Time
 	Banned            bool
+	Comments          []Comment
 }
 
 // Insert a User
@@ -36,4 +39,23 @@ func ValidatePassword(username, password string) int {
 		}
 	}
 	return -1
+}
+
+// GetComments gets the comments
+func (user User) GetComments() []Comment {
+	rows, err := db.Query("SELECT id,author,content,created,edited,updated,post_id,parent_comment FROM comments WHERE author = $1 ORDER BY updated DESC", user.Name)
+	util.Check(err)
+	// reform rows into comments
+	var Comments []Comment
+	for rows.Next() {
+		var comment Comment
+		err := rows.Scan(&comment.ID, &comment.Author, &comment.Content, &comment.CreatedTime, &comment.EditedTime, &comment.UpdatedTime, &comment.PostID, &comment.ParentID)
+		util.Check(err)
+		comment.DisplayTime = friendlyString(time.Since(comment.CreatedTime))
+		Comments = append(Comments, comment)
+	}
+	err = rows.Err()
+	util.Check(err)
+
+	return Comments
 }

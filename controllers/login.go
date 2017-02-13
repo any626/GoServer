@@ -74,7 +74,7 @@ func FinalizeLogin(username string, w http.ResponseWriter, r *http.Request) {
 			http.SetCookie(w, cookie)
 		}
 	}
-	http.Redirect(w, r, "/", 302)
+	http.Redirect(w, r, "/boards", 302)
 }
 
 // GetSecureUsername from secure cookie

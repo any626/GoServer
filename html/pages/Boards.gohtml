@@ -1,31 +1,7 @@
 {{ define "MessageBoard" }}
 {{ template "header" . }}
 {{ $posts := .Posts }}
-<script src="/content/js/reply.js"></script>
-<div id="edit-box">
-    <form action="/post-edit/" method="post" class="row edit-area">
-        <div class="form-group col-sm-12">
-            <textarea class="form-control edit-content" rows="3" name="Content"></textarea>
-        </div>
-        <div class="form-group col-sm-12 cancel-container">
-            <input type="submit" class="btn btn-secondary" value="Save">
-            <button type="button" class="btn btn-secondary edit-cancel-button">Cancel</button>
-        </div>
-    </form>
-</div>
-<div id="reply-box">
-    <div class="post-reply">
-        <form action="/post-reply/" method="post" class="row">
-            <div class="form-group col-sm-12">
-                <textarea class="form-control" rows="3" name="Content"></textarea>
-            </div>
-            <div class="form-group col-sm-12">
-                <input type="submit" class="btn btn-secondary" value="Reply">
-                <button type="button" class="btn btn-secondary reply-cancel-button">Cancel</button>
-            </div>
-        </form>
-    </div>
-</div>
+{{ template "reply" }}
 <div>
     <div class="row">
         <div class="post-new col-sm-4">
@@ -44,7 +20,7 @@
             {{ range $post := $posts }}            
                 <div class="post-box">
                     <div class="comment-header">
-                        <div class="author">{{ $post.Author }}</div>
+                        <div class="author"><a href="/user/{{ $post.Author }}">{{ $post.Author }}</a></div>
                         <div class="timestamp">{{ $post.DisplayTime }}</div>
                     </div>
                     <hr/>

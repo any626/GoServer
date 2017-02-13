@@ -6,7 +6,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/brwhale/GoServer/controllers"
@@ -29,20 +28,12 @@ func main() {
 	router.HandleFunc("/game", controllers.GameStart)
 	router.HandleFunc("/game/{gamestate}", controllers.Game)
 	router.HandleFunc("/boards", controllers.Boards)
+	router.HandleFunc("/user/{username}", controllers.User)
 	router.HandleFunc("/post-edit/{type}/{postid}", controllers.PostEdit)
 	router.HandleFunc("/post-reply/{type}/{postid}", controllers.PostReply)
 	router.HandleFunc("/test", controllers.Test)
 
-	log.Fatal(http.ListenAndServe(":8080", LowerCaseURI(router)))
-}
-
-// LowerCaseURI lowercases all the urls so it seems case insensitive
-func LowerCaseURI(h http.Handler) http.Handler {
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		r.URL.Path = strings.ToLower(r.URL.Path)
-		h.ServeHTTP(w, r)
-	}
-	return http.HandlerFunc(fn)
+	log.Fatal(http.ListenAndServe(":8080", router))
 }
 
 // StaticHandler handles static content such as images, css, javascript, etc

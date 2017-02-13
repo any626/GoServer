@@ -1,6 +1,3 @@
-html {
-    
-}
 body {
     color: beige;
     background-color: black;
@@ -100,9 +97,12 @@ hr {
     top: -2px;
 }
 .author {
-    color: orange;
     display: inline-block;
     font-size: 110%;
+}
+.author a {
+    color: orange;
+    text-decoration: none;
 }
 .timestamp {
     color: mediumseagreen;

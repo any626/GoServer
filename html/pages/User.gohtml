@@ -1,0 +1,20 @@
+{{ define "User" }}
+{{ template "header" . }}
+{{ template "reply" }}
+<div>
+    <div class="row">
+        <div class="post-new col-sm-4">
+            username
+            join date
+            posts
+            comments?
+        </div>
+        <div class="post-list col-sm-8"> 
+            {{ range $comment := .User.Comments }}
+                {{ template "comment" $comment}}
+            {{ end }}               
+        </div>
+    </div>
+</div>
+{{ template "footer" }}
+{{ end }}

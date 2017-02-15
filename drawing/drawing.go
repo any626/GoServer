@@ -19,9 +19,8 @@ func (c *Circle) Brightness(x, y float64) uint8 {
 	d := math.Sqrt(dx*dx+dy*dy) / c.R
 	if d > 1 {
 		return 0
-	} else {
-		return 255
 	}
+	return 255
 }
 
 // GetImage writes a png to the http response, it 'GET's an image
@@ -46,5 +45,8 @@ func GetImage(writer http.ResponseWriter) {
 			m.Set(x, y, c)
 		}
 	}
-	png.Encode(writer, m)
+	err := png.Encode(writer, m)
+	if err != nil {
+		http.Error(writer, err.Error(), 500)
+	}
 }

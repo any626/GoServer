@@ -35,15 +35,12 @@ func Connect() error {
 		d.Username, d.Password, d.DbName)
 	// open the db
 	db, err = sql.Open("postgres", dbinfo)
-	if err != nil {
-		return err
-	}
-	return nil
+	return err
 }
 
 // Disconnect the database
-func Disconnect() {
-	db.Close()
+func Disconnect() error {
+	return db.Close()
 }
 
 func friendlyString(duration time.Duration) string {

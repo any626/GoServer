@@ -16,21 +16,31 @@ func Boards(w http.ResponseWriter, r *http.Request) {
 	if Author != "" && Content != "" {
 		// add new post
 		now := time.Now()
-		database.Post{
+		err := database.Post{
 			Author:      Author,
 			Content:     Content,
 			CreatedTime: now,
 			EditedTime:  now,
 			UpdatedTime: now,
 		}.Insert()
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+		}
 	}
 	var mainpage MessageBoard
 	mainpage.CurrentUser = Author
-	mainpage.Posts = database.GetPosts()
+	var err error
+	mainpage.Posts, err = database.GetPosts()
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+	}
 	for index := range mainpage.Posts {
 		mainpage.Posts[index].IsOwnPost = Author == mainpage.Posts[index].Author
 	}
-	comments := database.GetComments()
+	comments, err := database.GetComments()
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+	}
 	for index := range comments {
 		comments[index].IsOwnComment = Author == comments[index].Author
 	}
@@ -58,20 +68,28 @@ func PostEdit(w http.ResponseWriter, r *http.Request) {
 	Content := r.FormValue("Content")
 	if Author != "" && Content != "" {
 		if thingType == "comment" {
-			oldcomment := database.GetComment(postID)
+			oldcomment, err := database.GetComment(postID)
+			if err != nil {
+				http.Error(w, err.Error(), 500)
+			}
 			if oldcomment.Author == Author {
-				database.Comment{
-					ID:      postID,
-					Content: Content,
-				}.UpdateContent()
+				oldcomment.Content = Content
+				err := oldcomment.UpdateContent()
+				if err != nil {
+					http.Error(w, err.Error(), 500)
+				}
 			}
 		} else if thingType == "post" {
-			oldpost := database.GetPost(postID)
+			oldpost, err := database.GetPost(postID)
+			if err != nil {
+				http.Error(w, err.Error(), 500)
+			}
 			if oldpost.Author == Author {
-				database.Post{
-					ID:      postID,
-					Content: Content,
-				}.UpdateContent()
+				oldpost.Content = Content
+				err := oldpost.UpdateContent()
+				if err != nil {
+					http.Error(w, err.Error(), 500)
+				}
 			}
 		}
 	}
@@ -88,7 +106,7 @@ func PostReply(w http.ResponseWriter, r *http.Request) {
 	if thingType == "post" {
 		if Author != "" && Content != "" {
 			now := time.Now()
-			database.Comment{
+			err := database.Comment{
 				Author:      Author,
 				Content:     Content,
 				CreatedTime: now,
@@ -96,13 +114,16 @@ func PostReply(w http.ResponseWriter, r *http.Request) {
 				UpdatedTime: now,
 				PostID:      postID,
 			}.Insert()
+			if err != nil {
+				http.Error(w, err.Error(), 500)
+			}
 		}
 	} else {
 		if Author != "" && Content != "" {
 			parent := postID
 			postID, _ = strconv.Atoi(thingType)
 			now := time.Now()
-			database.Comment{
+			err := database.Comment{
 				Author:      Author,
 				Content:     Content,
 				CreatedTime: now,
@@ -111,14 +132,17 @@ func PostReply(w http.ResponseWriter, r *http.Request) {
 				PostID:      postID,
 				ParentID:    parent,
 			}.Insert()
+			if err != nil {
+				http.Error(w, err.Error(), 500)
+			}
 		}
 	}
 	http.Redirect(w, r, "/boards", 302)
 }
 
 // GetChildren recursively builds the comment trees from a flat list of comments with parentIDs from the database
-func GetChildren(list []database.Comment, parentID int) []database.Comment {
-	var comments []database.Comment
+func GetChildren(list []*database.Comment, parentID int) []*database.Comment {
+	var comments []*database.Comment
 	for _, c := range list {
 		if c.ParentID == parentID {
 			c.Comments = GetChildren(list, c.ID)

@@ -3,8 +3,6 @@ package database
 import (
 	"time"
 
-	"github.com/brwhale/GoServer/util"
-
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -14,48 +12,47 @@ type User struct {
 	Name, Email, Hash string
 	CreatedTime       time.Time
 	Banned            bool
-	Comments          []Comment
+	Comments          []*Comment
 }
 
 // Insert a User
-func (user User) Insert() int {
-	var id int
-	err := db.QueryRow("INSERT INTO users(name,email,hash,created) VALUES($1,$2,$3,$4) RETURNING id", user.Name, user.Email, user.Hash, user.CreatedTime).Scan(&id)
-	if err != nil {
-		return -1
-	}
-	return int(id)
+func (user User) Insert() error {
+	_, err := db.Exec("INSERT INTO users(name,email,hash,created) VALUES($1,$2,$3,$4) RETURNING id", user.Name, user.Email, user.Hash, user.CreatedTime)
+	return err
 }
 
 // ValidatePassword validates the pw!
-func ValidatePassword(username, password string) int {
+func ValidatePassword(username, password string) bool {
 	row := db.QueryRow("SELECT id,hash FROM users WHERE name = $1", username)
 	var user User
 	err := row.Scan(&user.ID, &user.Hash)
 	if err == nil {
 		err = bcrypt.CompareHashAndPassword([]byte(user.Hash), []byte(password))
 		if err == nil {
-			return user.ID
+			return true
 		}
 	}
-	return -1
+	return false
 }
 
 // GetComments gets the comments
-func (user User) GetComments() []Comment {
+func (user *User) GetComments() ([]*Comment, error) {
+	var Comments []*Comment
 	rows, err := db.Query("SELECT id,author,content,created,edited,updated,post_id,parent_comment FROM comments WHERE author = $1 ORDER BY updated DESC", user.Name)
-	util.Check(err)
+	if err != nil {
+		return Comments, err
+	}
 	// reform rows into comments
-	var Comments []Comment
 	for rows.Next() {
 		var comment Comment
 		err := rows.Scan(&comment.ID, &comment.Author, &comment.Content, &comment.CreatedTime, &comment.EditedTime, &comment.UpdatedTime, &comment.PostID, &comment.ParentID)
-		util.Check(err)
+		if err != nil {
+			return Comments, err
+		}
 		comment.DisplayTime = friendlyString(time.Since(comment.CreatedTime))
-		Comments = append(Comments, comment)
+		Comments = append(Comments, &comment)
 	}
 	err = rows.Err()
-	util.Check(err)
 
-	return Comments
+	return Comments, err
 }

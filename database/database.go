@@ -6,8 +6,6 @@ import (
 	"io/ioutil"
 	"time"
 
-	"github.com/brwhale/GoServer/util"
-
 	"gopkg.in/yaml.v2"
 )
 
@@ -22,18 +20,25 @@ type DbConfig struct {
 }
 
 // Connect to database
-func Connect() {
+func Connect() error {
 	// read credentials from config file
 	d := DbConfig{}
 	b, err := ioutil.ReadFile("dbconfig.yaml")
-	util.Check(err)
+	if err != nil {
+		return err
+	}
 	err = yaml.Unmarshal(b, &d)
-	util.Check(err)
+	if err != nil {
+		return err
+	}
 	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
 		d.Username, d.Password, d.DbName)
 	// open the db
 	db, err = sql.Open("postgres", dbinfo)
-	util.Check(err)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // Disconnect the database

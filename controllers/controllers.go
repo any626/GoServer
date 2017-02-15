@@ -18,7 +18,7 @@ type Page struct {
 // MessageBoard is a container for posts
 type MessageBoard struct {
 	CurrentUser string
-	Posts       []database.Post
+	Posts       []*database.Post
 }
 
 var layouts = template.Must(template.ParseGlob("html/layout/*"))

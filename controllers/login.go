@@ -2,12 +2,10 @@ package controllers
 
 import (
 	"net/http"
+	"strings"
 	"time"
 
-	"strings"
-
 	"github.com/brwhale/GoServer/database"
-	"github.com/brwhale/GoServer/util"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -22,8 +20,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	Password := r.FormValue("Password")
 	val := validation{Errors: false, CurrentUser: GetSecureUsername(r)}
 	if Username != "" && Password != "" {
-		id := database.ValidatePassword(Username, Password)
-		if id >= 0 {
+		if database.ValidatePassword(Username, Password) {
 			// redirect
 			FinalizeLogin(Username, w, r)
 		}
@@ -50,9 +47,11 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		*/
 		if !strings.ContainsAny(Username, "/?#") && len(Password) > 9 {
 			hash, err := bcrypt.GenerateFromPassword([]byte(Password), bcrypt.DefaultCost)
-			util.Check(err)
-			id := database.User{Name: Username, Hash: string(hash)}.Insert()
-			if id >= 0 {
+			if err != nil {
+				http.Error(w, err.Error(), 500)
+			}
+			err = database.User{Name: Username, Hash: string(hash)}.Insert()
+			if err == nil {
 				// redirect
 				FinalizeLogin(Username, w, r)
 			}

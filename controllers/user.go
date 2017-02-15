@@ -17,7 +17,11 @@ func User(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	currentUser := GetSecureUsername(r)
 	user := database.User{Name: vars["username"]}
-	user.Comments = user.GetComments()
+	var err error
+	user.Comments, err = user.GetComments()
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+	}
 	for index := range user.Comments {
 		user.Comments[index].IsOwnComment = currentUser == user.Comments[index].Author
 	}

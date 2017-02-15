@@ -1,6 +1,6 @@
 package main
 
-// this is my new Go plaground!! :)
+// this is my new Go plaground!
 
 import (
 	"io"
@@ -18,7 +18,7 @@ func main() {
 	database.Connect()
 	defer database.Disconnect()
 	database.GenerateSecureCookie()
-
+	// set routing
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/content/{type}/{filename}", StaticHandler)
 	router.HandleFunc("/", controllers.Index)
@@ -32,8 +32,24 @@ func main() {
 	router.HandleFunc("/post-edit/{type}/{postid}", controllers.PostEdit)
 	router.HandleFunc("/post-reply/{type}/{postid}", controllers.PostReply)
 	router.HandleFunc("/test", controllers.Test)
-
-	log.Fatal(http.ListenAndServe(":8080", router))
+	// redirect to https
+	unsecureserver := &http.Server{
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 5 * time.Second,
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			w.Header().Set("Connection", "close")
+			url := "https://" + req.Host + req.URL.String()
+			http.Redirect(w, req, url, http.StatusMovedPermanently)
+		}),
+	}
+	go func() { log.Fatal(unsecureserver.ListenAndServe()) }()
+	// run https server
+	secureserver := &http.Server{
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+		Handler:      router,
+	}
+	log.Fatal(secureserver.ListenAndServeTLS("server.crt", "server.key"))
 }
 
 // StaticHandler handles static content such as images, css, javascript, etc

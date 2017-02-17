@@ -17,7 +17,15 @@ type User struct {
 
 // Insert a User
 func (user User) Insert() error {
-	_, err := db.Exec("INSERT INTO users(name,email,hash,created) VALUES($1,$2,$3,$4) RETURNING id", user.Name, user.Email, user.Hash, user.CreatedTime)
+	_, err := db.Exec(`INSERT INTO users
+		(name, email, hash, created)
+		VALUES($1, $2, $3, $4)
+		RETURNING id`,
+		user.Name,
+		user.Email,
+		user.Hash,
+		user.CreatedTime,
+	)
 	return err
 }
 
@@ -38,14 +46,28 @@ func ValidatePassword(username, password string) bool {
 // GetComments gets the comments
 func (user *User) GetComments() ([]*Comment, error) {
 	var Comments []*Comment
-	rows, err := db.Query("SELECT id,author,content,created,edited,updated,post_id,parent_comment FROM comments WHERE author = $1 ORDER BY updated DESC", user.Name)
+	rows, err := db.Query(`SELECT
+		id, author, content, created, edited, updated, post_id, parent_comment
+		FROM comments
+		WHERE author = $1
+		ORDER BY updated DESC`,
+		user.Name,
+	)
 	if err != nil {
 		return Comments, err
 	}
 	// reform rows into comments
 	for rows.Next() {
 		var comment Comment
-		err := rows.Scan(&comment.ID, &comment.Author, &comment.Content, &comment.CreatedTime, &comment.EditedTime, &comment.UpdatedTime, &comment.PostID, &comment.ParentID)
+		err := rows.Scan(&comment.ID,
+			&comment.Author,
+			&comment.Content,
+			&comment.CreatedTime,
+			&comment.EditedTime,
+			&comment.UpdatedTime,
+			&comment.PostID,
+			&comment.ParentID,
+		)
 		if err != nil {
 			return Comments, err
 		}

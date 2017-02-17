@@ -50,7 +50,8 @@ func Boards(w http.ResponseWriter, r *http.Request) {
 			for pindex := range mainpage.Posts {
 				if mainpage.Posts[pindex].ID == comment.PostID {
 					comment.Comments = GetChildren(comments, comment.ID)
-					mainpage.Posts[pindex].Comments = append(mainpage.Posts[pindex].Comments, comment)
+					mainpage.Posts[pindex].Comments =
+						append(mainpage.Posts[pindex].Comments, comment)
 					break
 				}
 			}
@@ -140,7 +141,8 @@ func PostReply(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/boards", 302)
 }
 
-// GetChildren recursively builds the comment trees from a flat list of comments with parentIDs from the database
+// GetChildren recursively builds the comment trees from a
+// flat list of comments with parentIDs from the database
 func GetChildren(list []*database.Comment, parentID int) []*database.Comment {
 	var comments []*database.Comment
 	for _, c := range list {

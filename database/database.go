@@ -4,13 +4,17 @@ import (
 	"database/sql"
 	"fmt"
 	"io/ioutil"
-	"time"
+
+	"github.com/gorilla/securecookie"
 
 	"gopkg.in/yaml.v2"
 )
 
-// database object
-var db *sql.DB
+// KataDB is the injected database object
+type KataDB struct {
+	db *sql.DB
+	sc *securecookie.SecureCookie
+}
 
 // DbConfig is the database configuration format
 type DbConfig struct {
@@ -20,7 +24,7 @@ type DbConfig struct {
 }
 
 // Connect to database
-func Connect() error {
+func (db *KataDB) Connect() error {
 	// read credentials from config file
 	d := DbConfig{}
 	b, err := ioutil.ReadFile("dbconfig.yaml")
@@ -34,33 +38,11 @@ func Connect() error {
 	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
 		d.Username, d.Password, d.DbName)
 	// open the db
-	db, err = sql.Open("postgres", dbinfo)
+	db.db, err = sql.Open("postgres", dbinfo)
 	return err
 }
 
 // Disconnect the database
-func Disconnect() error {
-	return db.Close()
-}
-
-func friendlyString(duration time.Duration) string {
-	if duration.Hours() >= 48 {
-		return fmt.Sprintf("%.0f days ago", duration.Hours()/24)
-	}
-	if duration.Hours() >= 24 {
-		return "1 day ago"
-	}
-	if duration.Hours() >= 2 {
-		return fmt.Sprintf("%.0f hours ago", duration.Hours())
-	}
-	if duration.Hours() >= 1 {
-		return "1 hour ago"
-	}
-	if duration.Minutes() >= 2 {
-		return fmt.Sprintf("%.0f minutes ago", duration.Minutes())
-	}
-	if duration.Minutes() >= 1 {
-		return "1 minute ago"
-	}
-	return "a couple seconds ago"
+func (db *KataDB) Disconnect() error {
+	return db.db.Close()
 }

@@ -6,11 +6,9 @@ import (
 	"github.com/gorilla/securecookie"
 )
 
-var sc *securecookie.SecureCookie
-
 // GenerateSecureCookie gets new crypto
-func GenerateSecureCookie() {
-	row := db.QueryRow("SELECT hash,block FROM securecookie LIMIT 1")
+func (db *KataDB) GenerateSecureCookie() {
+	row := db.db.QueryRow("SELECT hash,block FROM securecookie LIMIT 1")
 	var blockKey, hashKey []byte
 	err := row.Scan(&hashKey, &blockKey)
 	if err != nil {
@@ -18,17 +16,17 @@ func GenerateSecureCookie() {
 		fmt.Println("All users will need to refresh their logins.")
 		hashKey = securecookie.GenerateRandomKey(64)
 		blockKey = securecookie.GenerateRandomKey(32)
-		db.QueryRow("INSERT INTO securecookie(hash,block) VALUES($1,$2)", hashKey, blockKey)
+		db.db.QueryRow("INSERT INTO securecookie(hash,block) VALUES($1,$2)", hashKey, blockKey)
 	}
-	sc = securecookie.New(hashKey, blockKey)
+	db.sc = securecookie.New(hashKey, blockKey)
 }
 
 // SecureEncode encodes with our secure cookie
-func SecureEncode(name string, value interface{}) (string, error) {
-	return sc.Encode(name, value)
+func (db *KataDB) SecureEncode(name string, value interface{}) (string, error) {
+	return db.sc.Encode(name, value)
 }
 
 // SecureDecode decodes with our secure cookie
-func SecureDecode(name, value string, dest interface{}) error {
-	return sc.Decode(name, value, dest)
+func (db *KataDB) SecureDecode(name, value string, dest interface{}) error {
+	return db.sc.Decode(name, value, dest)
 }

@@ -21,27 +21,39 @@ type MessageBoard struct {
 	Posts       []*database.Post
 }
 
-var layouts = template.Must(template.ParseGlob("html/layout/*"))
-var templates = template.Must(layouts.ParseGlob("html/pages/*"))
+// KataController is the main struct for the pages
+type KataController struct {
+	layouts, templates *template.Template
+	DB                 *database.KataDB
+}
+
+// NewController makes a new controller, inject a db into it
+func NewController(db *database.KataDB) *KataController {
+	var theController KataController
+	theController.DB = db
+	theController.layouts = template.Must(template.ParseGlob("html/layout/*"))
+	theController.templates = template.Must(theController.layouts.ParseGlob("html/pages/*"))
+	return &theController
+}
 
 // Index is the Home page
-func Index(w http.ResponseWriter, r *http.Request) {
-	templates.ExecuteTemplate(w, "Index", Page{CurrentUser: GetSecureUsername(r)})
+func (c *KataController) Index(w http.ResponseWriter, r *http.Request) {
+	c.templates.ExecuteTemplate(w, "Index", Page{CurrentUser: c.GetSecureUsername(r)})
 }
 
 // GameStart is the landing page for the game
-func GameStart(w http.ResponseWriter, r *http.Request) {
-	templates.ExecuteTemplate(w, "Start", Page{CurrentUser: GetSecureUsername(r)})
+func (c *KataController) GameStart(w http.ResponseWriter, r *http.Request) {
+	c.templates.ExecuteTemplate(w, "Start", Page{CurrentUser: c.GetSecureUsername(r)})
 }
 
 // Game is the dynamic game pages
-func Game(w http.ResponseWriter, r *http.Request) {
+func (c *KataController) Game(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	page := Page{Title: vars["gamestate"], CurrentUser: GetSecureUsername(r)}
-	templates.ExecuteTemplate(w, "Game", page)
+	page := Page{Title: vars["gamestate"], CurrentUser: c.GetSecureUsername(r)}
+	c.templates.ExecuteTemplate(w, "Game", page)
 }
 
 // Test is a test of image generation
-func Test(w http.ResponseWriter, r *http.Request) {
+func (c *KataController) Test(w http.ResponseWriter, r *http.Request) {
 	drawing.GetImage(w)
 }

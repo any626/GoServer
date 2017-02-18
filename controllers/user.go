@@ -13,17 +13,17 @@ type userView struct {
 }
 
 // User edits posts
-func User(w http.ResponseWriter, r *http.Request) {
+func (c *KataController) User(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	currentUser := GetSecureUsername(r)
+	currentUser := c.GetSecureUsername(r)
 	user := database.User{Name: vars["username"]}
 	var err error
-	user.Comments, err = user.GetComments()
+	user.Comments, err = c.DB.GetCommentsForUser(&user)
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 	}
 	for index := range user.Comments {
 		user.Comments[index].IsOwnComment = currentUser == user.Comments[index].Author
 	}
-	templates.ExecuteTemplate(w, "User", userView{User: user, CurrentUser: currentUser})
+	c.templates.ExecuteTemplate(w, "User", userView{User: user, CurrentUser: currentUser})
 }

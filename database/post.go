@@ -1,6 +1,10 @@
 package database
 
-import "time"
+import (
+	"time"
+
+	"github.com/brwhale/GoServer/util"
+)
 
 // Post is a container for comments
 type Post struct {
@@ -12,9 +16,9 @@ type Post struct {
 	ID                                   int
 }
 
-// Insert a Post
-func (post Post) Insert() error {
-	_, err := db.Exec(`INSERT INTO posts
+// InsertPost inserts a Post
+func (db *KataDB) InsertPost(post Post) error {
+	_, err := db.db.Exec(`INSERT INTO posts
 		(author, content, created, edited, updated)
 		VALUES($1, $2, $3, $4, $5)`,
 		post.Author,
@@ -26,10 +30,10 @@ func (post Post) Insert() error {
 	return err
 }
 
-// UpdateContent of a Post
-func (post *Post) UpdateContent() error {
+// UpdatePost updates a Post
+func (db *KataDB) UpdatePost(post *Post) error {
 	now := time.Now()
-	_, err := db.Exec(`UPDATE posts
+	_, err := db.db.Exec(`UPDATE posts
 		SET content = $1,
 			updated = $2,
 			edited = $2
@@ -42,9 +46,9 @@ func (post *Post) UpdateContent() error {
 }
 
 // GetPosts gets the posts
-func GetPosts() ([]*Post, error) {
+func (db *KataDB) GetPosts() ([]*Post, error) {
 	var posts []*Post
-	rows, err := db.Query(`SELECT
+	rows, err := db.db.Query(`SELECT
 		id, author, content, created, updated
 		FROM posts ORDER BY updated DESC`)
 	if err != nil {
@@ -62,7 +66,7 @@ func GetPosts() ([]*Post, error) {
 		if err != nil {
 			return posts, err
 		}
-		post.DisplayTime = friendlyString(time.Since(post.CreatedTime))
+		post.DisplayTime = util.FriendlyString(time.Since(post.CreatedTime))
 		posts = append(posts, &post)
 	}
 	err = rows.Err()
@@ -71,8 +75,8 @@ func GetPosts() ([]*Post, error) {
 }
 
 // GetPost gets a post with a specific id
-func GetPost(id int) (Post, error) {
-	row := db.QueryRow(`SELECT
+func (db *KataDB) GetPost(id int) (Post, error) {
+	row := db.db.QueryRow(`SELECT
 		id, author, content, created
 		FROM posts WHERE id = $1`,
 		id,

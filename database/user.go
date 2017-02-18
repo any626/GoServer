@@ -3,6 +3,8 @@ package database
 import (
 	"time"
 
+	"github.com/brwhale/GoServer/util"
+
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -15,9 +17,9 @@ type User struct {
 	Comments          []*Comment
 }
 
-// Insert a User
-func (user User) Insert() error {
-	_, err := db.Exec(`INSERT INTO users
+// InsertUser inserts a User
+func (db *KataDB) InsertUser(user User) error {
+	_, err := db.db.Exec(`INSERT INTO users
 		(name, email, hash, created)
 		VALUES($1, $2, $3, $4)
 		RETURNING id`,
@@ -30,8 +32,8 @@ func (user User) Insert() error {
 }
 
 // ValidatePassword validates the pw!
-func ValidatePassword(username, password string) bool {
-	row := db.QueryRow("SELECT id,hash FROM users WHERE name = $1", username)
+func (db *KataDB) ValidatePassword(username, password string) bool {
+	row := db.db.QueryRow("SELECT id,hash FROM users WHERE name = $1", username)
 	var user User
 	err := row.Scan(&user.ID, &user.Hash)
 	if err == nil {
@@ -43,10 +45,10 @@ func ValidatePassword(username, password string) bool {
 	return false
 }
 
-// GetComments gets the comments
-func (user *User) GetComments() ([]*Comment, error) {
+// GetCommentsForUser gets the comments for a user
+func (db *KataDB) GetCommentsForUser(user *User) ([]*Comment, error) {
 	var Comments []*Comment
-	rows, err := db.Query(`SELECT
+	rows, err := db.db.Query(`SELECT
 		id, author, content, created, edited, updated, post_id, parent_comment
 		FROM comments
 		WHERE author = $1
@@ -71,7 +73,7 @@ func (user *User) GetComments() ([]*Comment, error) {
 		if err != nil {
 			return Comments, err
 		}
-		comment.DisplayTime = friendlyString(time.Since(comment.CreatedTime))
+		comment.DisplayTime = util.FriendlyString(time.Since(comment.CreatedTime))
 		Comments = append(Comments, &comment)
 	}
 	err = rows.Err()

@@ -10,19 +10,19 @@ import (
 )
 
 // Boards is the wip bulletin board
-func Boards(w http.ResponseWriter, r *http.Request) {
-	Author := GetSecureUsername(r)
+func (c *KataController) Boards(w http.ResponseWriter, r *http.Request) {
+	Author := c.GetSecureUsername(r)
 	Content := r.FormValue("Content")
 	if Author != "" && Content != "" {
 		// add new post
 		now := time.Now()
-		err := database.Post{
+		err := c.DB.InsertPost(database.Post{
 			Author:      Author,
 			Content:     Content,
 			CreatedTime: now,
 			EditedTime:  now,
 			UpdatedTime: now,
-		}.Insert()
+		})
 		if err != nil {
 			http.Error(w, err.Error(), 500)
 		}
@@ -30,14 +30,14 @@ func Boards(w http.ResponseWriter, r *http.Request) {
 	var mainpage MessageBoard
 	mainpage.CurrentUser = Author
 	var err error
-	mainpage.Posts, err = database.GetPosts()
+	mainpage.Posts, err = c.DB.GetPosts()
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 	}
 	for index := range mainpage.Posts {
 		mainpage.Posts[index].IsOwnPost = Author == mainpage.Posts[index].Author
 	}
-	comments, err := database.GetComments()
+	comments, err := c.DB.GetComments()
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 	}
@@ -57,37 +57,37 @@ func Boards(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-	templates.ExecuteTemplate(w, "MessageBoard", mainpage)
+	c.templates.ExecuteTemplate(w, "MessageBoard", mainpage)
 }
 
 // PostEdit edits posts
-func PostEdit(w http.ResponseWriter, r *http.Request) {
+func (c *KataController) PostEdit(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	postID, _ := strconv.Atoi(vars["postid"])
 	thingType := vars["type"]
-	Author := GetSecureUsername(r)
+	Author := c.GetSecureUsername(r)
 	Content := r.FormValue("Content")
 	if Author != "" && Content != "" {
 		if thingType == "comment" {
-			oldcomment, err := database.GetComment(postID)
+			oldcomment, err := c.DB.GetComment(postID)
 			if err != nil {
 				http.Error(w, err.Error(), 500)
 			}
 			if oldcomment.Author == Author {
 				oldcomment.Content = Content
-				err := oldcomment.UpdateContent()
+				err := c.DB.UpdateComment(&oldcomment)
 				if err != nil {
 					http.Error(w, err.Error(), 500)
 				}
 			}
 		} else if thingType == "post" {
-			oldpost, err := database.GetPost(postID)
+			oldpost, err := c.DB.GetPost(postID)
 			if err != nil {
 				http.Error(w, err.Error(), 500)
 			}
 			if oldpost.Author == Author {
 				oldpost.Content = Content
-				err := oldpost.UpdateContent()
+				err := c.DB.UpdatePost(&oldpost)
 				if err != nil {
 					http.Error(w, err.Error(), 500)
 				}
@@ -98,23 +98,23 @@ func PostEdit(w http.ResponseWriter, r *http.Request) {
 }
 
 // PostReply replies to posts
-func PostReply(w http.ResponseWriter, r *http.Request) {
+func (c *KataController) PostReply(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	postID, _ := strconv.Atoi(vars["postid"])
 	thingType := vars["type"]
-	Author := GetSecureUsername(r)
+	Author := c.GetSecureUsername(r)
 	Content := r.FormValue("Content")
 	if thingType == "post" {
 		if Author != "" && Content != "" {
 			now := time.Now()
-			err := database.Comment{
+			err := c.DB.InsertComment(database.Comment{
 				Author:      Author,
 				Content:     Content,
 				CreatedTime: now,
 				EditedTime:  now,
 				UpdatedTime: now,
 				PostID:      postID,
-			}.Insert()
+			})
 			if err != nil {
 				http.Error(w, err.Error(), 500)
 			}
@@ -124,7 +124,7 @@ func PostReply(w http.ResponseWriter, r *http.Request) {
 			parent := postID
 			postID, _ = strconv.Atoi(thingType)
 			now := time.Now()
-			err := database.Comment{
+			err := c.DB.InsertComment(database.Comment{
 				Author:      Author,
 				Content:     Content,
 				CreatedTime: now,
@@ -132,7 +132,7 @@ func PostReply(w http.ResponseWriter, r *http.Request) {
 				UpdatedTime: now,
 				PostID:      postID,
 				ParentID:    parent,
-			}.Insert()
+			})
 			if err != nil {
 				http.Error(w, err.Error(), 500)
 			}

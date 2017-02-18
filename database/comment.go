@@ -1,6 +1,10 @@
 package database
 
-import "time"
+import (
+	"time"
+
+	"github.com/brwhale/GoServer/util"
+)
 
 // Comment is the meat of it so far
 type Comment struct {
@@ -12,9 +16,9 @@ type Comment struct {
 	ID, ParentID, PostID                 int
 }
 
-// Insert a Comment
-func (comment Comment) Insert() error {
-	_, err := db.Exec(`INSERT INTO comments
+// InsertComment a Comment
+func (db *KataDB) InsertComment(comment Comment) error {
+	_, err := db.db.Exec(`INSERT INTO comments
 		(author, content, created, edited, updated, post_id, parent_comment)
 		VALUES($1, $2, $3, $4, $5, $6, $7)`,
 		comment.Author,
@@ -29,7 +33,7 @@ func (comment Comment) Insert() error {
 		return err
 	}
 	now := time.Now()
-	_, err = db.Exec(`UPDATE posts
+	_, err = db.db.Exec(`UPDATE posts
 		SET updated = $1
 		WHERE id = $2`,
 		now,
@@ -39,7 +43,7 @@ func (comment Comment) Insert() error {
 		return err
 	}
 	if comment.ParentID > 0 {
-		_, err = db.Exec(`UPDATE comments
+		_, err = db.db.Exec(`UPDATE comments
 			SET updated = $1
 			WHERE id = $2`,
 			now,
@@ -50,10 +54,10 @@ func (comment Comment) Insert() error {
 	return nil
 }
 
-// UpdateContent of a Comment
-func (comment *Comment) UpdateContent() error {
+// UpdateComment updates of a Comment
+func (db *KataDB) UpdateComment(comment *Comment) error {
 	now := time.Now()
-	_, err := db.Exec(`UPDATE comments
+	_, err := db.db.Exec(`UPDATE comments
 		SET content = $1,
 			updated = $2,
 			edited = $2
@@ -65,8 +69,8 @@ func (comment *Comment) UpdateContent() error {
 }
 
 // GetComment gets a comment for verification
-func GetComment(id int) (Comment, error) {
-	row := db.QueryRow(`SELECT
+func (db *KataDB) GetComment(id int) (Comment, error) {
+	row := db.db.QueryRow(`SELECT
 		id, author, content, created
 		FROM comments
 		WHERE id = $1`,
@@ -78,9 +82,9 @@ func GetComment(id int) (Comment, error) {
 }
 
 // GetComments gets the comments
-func GetComments() ([]*Comment, error) {
+func (db *KataDB) GetComments() ([]*Comment, error) {
 	var Comments []*Comment
-	rows, err := db.Query(`SELECT
+	rows, err := db.db.Query(`SELECT
 		id, author, content, created, edited, updated, post_id, parent_comment
 		FROM comments
 		ORDER BY updated DESC`)
@@ -102,7 +106,7 @@ func GetComments() ([]*Comment, error) {
 		if err != nil {
 			return Comments, err
 		}
-		comment.DisplayTime = friendlyString(time.Since(comment.CreatedTime))
+		comment.DisplayTime = util.FriendlyString(time.Since(comment.CreatedTime))
 		Comments = append(Comments, &comment)
 	}
 	err = rows.Err()

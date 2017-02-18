@@ -15,23 +15,25 @@ import (
 )
 
 func main() {
-	database.Connect()
-	defer database.Disconnect()
-	database.GenerateSecureCookie()
+	var db database.KataDB
+	db.Connect()
+	defer db.Disconnect()
+	db.GenerateSecureCookie()
+	kc := controllers.NewController(&db)
 	// set routing
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/content/{type}/{filename}", StaticHandler)
-	router.HandleFunc("/", controllers.Index)
-	router.HandleFunc("/login", controllers.Login)
-	router.HandleFunc("/logout", controllers.Logout)
-	router.HandleFunc("/register", controllers.Register)
-	router.HandleFunc("/game", controllers.GameStart)
-	router.HandleFunc("/game/{gamestate}", controllers.Game)
-	router.HandleFunc("/boards", controllers.Boards)
-	router.HandleFunc("/user/{username}", controllers.User)
-	router.HandleFunc("/post-edit/{type}/{postid}", controllers.PostEdit)
-	router.HandleFunc("/post-reply/{type}/{postid}", controllers.PostReply)
-	router.HandleFunc("/test", controllers.Test)
+	router.HandleFunc("/", kc.Index)
+	router.HandleFunc("/login", kc.Login)
+	router.HandleFunc("/logout", kc.Logout)
+	router.HandleFunc("/register", kc.Register)
+	router.HandleFunc("/game", kc.GameStart)
+	router.HandleFunc("/game/{gamestate}", kc.Game)
+	router.HandleFunc("/boards", kc.Boards)
+	router.HandleFunc("/user/{username}", kc.User)
+	router.HandleFunc("/post-edit/{type}/{postid}", kc.PostEdit)
+	router.HandleFunc("/post-reply/{type}/{postid}", kc.PostReply)
+	router.HandleFunc("/test", kc.Test)
 	// redirect to https
 	unsecureserver := &http.Server{
 		ReadTimeout:  5 * time.Second,

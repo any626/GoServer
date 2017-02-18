@@ -15,30 +15,30 @@ type validation struct {
 }
 
 // Login is the login page for the site
-func Login(w http.ResponseWriter, r *http.Request) {
+func (c *KataController) Login(w http.ResponseWriter, r *http.Request) {
 	Username := r.FormValue("Username")
 	Password := r.FormValue("Password")
-	val := validation{Errors: false, CurrentUser: GetSecureUsername(r)}
+	val := validation{Errors: false, CurrentUser: c.GetSecureUsername(r)}
 	if Username != "" && Password != "" {
-		if database.ValidatePassword(Username, Password) {
+		if c.DB.ValidatePassword(Username, Password) {
 			// redirect
-			FinalizeLogin(Username, w, r)
+			c.FinalizeLogin(Username, w, r)
 		}
 		val.Errors = true
 	}
-	templates.ExecuteTemplate(w, "Login", val)
+	c.templates.ExecuteTemplate(w, "Login", val)
 }
 
 // Logout is the logout page for the site
-func Logout(w http.ResponseWriter, r *http.Request) {
-	FinalizeLogin("", w, r)
+func (c *KataController) Logout(w http.ResponseWriter, r *http.Request) {
+	c.FinalizeLogin("", w, r)
 }
 
 // Register is the register page for the site
-func Register(w http.ResponseWriter, r *http.Request) {
+func (c *KataController) Register(w http.ResponseWriter, r *http.Request) {
 	Username := r.FormValue("Username")
 	Password := r.FormValue("Password")
-	val := validation{Errors: false, CurrentUser: GetSecureUsername(r)}
+	val := validation{Errors: false, CurrentUser: c.GetSecureUsername(r)}
 	if Username != "" && Password != "" {
 		/*
 			Don't let people register names with these characters:
@@ -50,19 +50,19 @@ func Register(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				http.Error(w, err.Error(), 500)
 			}
-			err = database.User{Name: Username, Hash: string(hash)}.Insert()
+			err = c.DB.InsertUser(database.User{Name: Username, Hash: string(hash)})
 			if err == nil {
 				// redirect
-				FinalizeLogin(Username, w, r)
+				c.FinalizeLogin(Username, w, r)
 			}
 		}
 		val.Errors = true
 	}
-	templates.ExecuteTemplate(w, "Register", val)
+	c.templates.ExecuteTemplate(w, "Register", val)
 }
 
 // FinalizeLogin generates cookie and save session info
-func FinalizeLogin(username string, w http.ResponseWriter, r *http.Request) {
+func (c *KataController) FinalizeLogin(username string, w http.ResponseWriter, r *http.Request) {
 	if username == "" {
 		cookie := &http.Cookie{
 			Name:    "login-name",
@@ -75,7 +75,7 @@ func FinalizeLogin(username string, w http.ResponseWriter, r *http.Request) {
 		value := map[string]string{
 			"username": username,
 		}
-		if encoded, err := database.SecureEncode("login-name", value); err == nil {
+		if encoded, err := c.DB.SecureEncode("login-name", value); err == nil {
 			cookie := &http.Cookie{
 				Name:  "login-name",
 				Value: encoded,
@@ -88,11 +88,11 @@ func FinalizeLogin(username string, w http.ResponseWriter, r *http.Request) {
 }
 
 // GetSecureUsername from secure cookie
-func GetSecureUsername(r *http.Request) string {
+func (c *KataController) GetSecureUsername(r *http.Request) string {
 	Username := ""
 	if cookie, err := r.Cookie("login-name"); err == nil {
 		value := make(map[string]string)
-		if err = database.SecureDecode("login-name", cookie.Value, &value); err == nil {
+		if err = c.DB.SecureDecode("login-name", cookie.Value, &value); err == nil {
 			Username = value["username"]
 		}
 	}

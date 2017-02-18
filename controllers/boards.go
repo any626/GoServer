@@ -104,38 +104,26 @@ func (c *KataController) PostReply(w http.ResponseWriter, r *http.Request) {
 	thingType := vars["type"]
 	Author := c.GetSecureUsername(r)
 	Content := r.FormValue("Content")
-	if thingType == "post" {
-		if Author != "" && Content != "" {
-			now := time.Now()
-			err := c.DB.InsertComment(database.Comment{
-				Author:      Author,
-				Content:     Content,
-				CreatedTime: now,
-				EditedTime:  now,
-				UpdatedTime: now,
-				PostID:      postID,
-			})
-			if err != nil {
-				http.Error(w, err.Error(), 500)
-			}
-		}
-	} else {
-		if Author != "" && Content != "" {
-			parent := postID
+	if Author != "" && Content != "" {
+		var parent int
+		if thingType == "post" {
+			parent = 0
+		} else {
+			parent = postID
 			postID, _ = strconv.Atoi(thingType)
-			now := time.Now()
-			err := c.DB.InsertComment(database.Comment{
-				Author:      Author,
-				Content:     Content,
-				CreatedTime: now,
-				EditedTime:  now,
-				UpdatedTime: now,
-				PostID:      postID,
-				ParentID:    parent,
-			})
-			if err != nil {
-				http.Error(w, err.Error(), 500)
-			}
+		}
+		now := time.Now()
+		err := c.DB.InsertComment(database.Comment{
+			Author:      Author,
+			Content:     Content,
+			CreatedTime: now,
+			EditedTime:  now,
+			UpdatedTime: now,
+			PostID:      postID,
+			ParentID:    parent,
+		})
+		if err != nil {
+			http.Error(w, err.Error(), 500)
 		}
 	}
 	http.Redirect(w, r, "/boards", 302)

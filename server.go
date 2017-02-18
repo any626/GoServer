@@ -31,6 +31,7 @@ func main() {
 	router.HandleFunc("/game/{gamestate}", kc.Game)
 	router.HandleFunc("/boards", kc.Boards)
 	router.HandleFunc("/user/{username}", kc.User)
+	router.HandleFunc("/newpost", kc.PostNew)
 	router.HandleFunc("/post-edit/{type}/{postid}", kc.PostEdit)
 	router.HandleFunc("/post-reply/{type}/{postid}", kc.PostReply)
 	router.HandleFunc("/test", kc.Test)

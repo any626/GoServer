@@ -60,6 +60,27 @@ func (c *KataController) Boards(w http.ResponseWriter, r *http.Request) {
 	c.templates.ExecuteTemplate(w, "MessageBoard", mainpage)
 }
 
+// PostNew posts a new post
+func (c *KataController) PostNew(w http.ResponseWriter, r *http.Request) {
+	Author := c.GetSecureUsername(r)
+	Content := r.FormValue("Content")
+	if Author != "" && Content != "" {
+		// add new post
+		now := time.Now()
+		err := c.DB.InsertPost(database.Post{
+			Author:      Author,
+			Content:     Content,
+			CreatedTime: now,
+			EditedTime:  now,
+			UpdatedTime: now,
+		})
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+		}
+	}
+	http.Redirect(w, r, "/boards", 302)
+}
+
 // PostEdit edits posts
 func (c *KataController) PostEdit(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)

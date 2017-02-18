@@ -12,21 +12,6 @@ import (
 // Boards is the wip bulletin board
 func (c *KataController) Boards(w http.ResponseWriter, r *http.Request) {
 	Author := c.GetSecureUsername(r)
-	Content := r.FormValue("Content")
-	if Author != "" && Content != "" {
-		// add new post
-		now := time.Now()
-		err := c.DB.InsertPost(database.Post{
-			Author:      Author,
-			Content:     Content,
-			CreatedTime: now,
-			EditedTime:  now,
-			UpdatedTime: now,
-		})
-		if err != nil {
-			http.Error(w, err.Error(), 500)
-		}
-	}
 	var mainpage MessageBoard
 	mainpage.CurrentUser = Author
 	var err error

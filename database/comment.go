@@ -10,7 +10,7 @@ import (
 type Comment struct {
 	Author, Content                      string
 	CreatedTime, EditedTime, UpdatedTime time.Time
-	DisplayTime                          string
+	DisplayTime, EditedDisplayTime       string
 	Comments                             []*Comment
 	IsOwnComment                         bool
 	ID, ParentID, PostID                 int
@@ -107,6 +107,11 @@ func (db *KataDB) GetComments() ([]*Comment, error) {
 			return Comments, err
 		}
 		comment.DisplayTime = util.FriendlyString(time.Since(comment.CreatedTime))
+		if comment.CreatedTime.Equal(comment.EditedTime) {
+			comment.EditedDisplayTime = util.FriendlyString(time.Since(comment.EditedTime))
+		} else {
+			comment.EditedDisplayTime = ""
+		}
 		Comments = append(Comments, &comment)
 	}
 	err = rows.Err()

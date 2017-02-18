@@ -16,7 +16,7 @@ func PrettyPrint(v interface{}) {
 	log.Println(string(out))
 }
 
-// time in a friendly format
+// FriendlyString gets time in a friendly format
 func FriendlyString(duration time.Duration) string {
 	if duration.Hours() >= 48 {
 		return fmt.Sprintf("%.0f days ago", duration.Hours()/24)

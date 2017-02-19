@@ -109,6 +109,11 @@ hr {
     display: inline-block;
     font-size: 90%;
     padding-left: 5px;
+    font-size: 90%;
+}
+.edit-timestamp {
+    color: mediumpurple;
+    font-size: 70%;
 }
 .post-new {
     background-color: #111;

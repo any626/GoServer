@@ -108,9 +108,9 @@ func (db *KataDB) GetComments() ([]*Comment, error) {
 		}
 		comment.DisplayTime = util.FriendlyString(time.Since(comment.CreatedTime))
 		if comment.CreatedTime.Equal(comment.EditedTime) {
-			comment.EditedDisplayTime = util.FriendlyString(time.Since(comment.EditedTime))
-		} else {
 			comment.EditedDisplayTime = ""
+		} else {
+			comment.EditedDisplayTime = "*edited " + util.FriendlyString(time.Since(comment.EditedTime))
 		}
 		Comments = append(Comments, &comment)
 	}

@@ -24,22 +24,23 @@ type DbConfig struct {
 }
 
 // Connect to database
-func (db *KataDB) Connect() error {
+func Connect() (KataDB, error) {
 	// read credentials from config file
+	db := KataDB{}
 	d := DbConfig{}
 	b, err := ioutil.ReadFile("dbconfig.yaml")
 	if err != nil {
-		return err
+		return db, err
 	}
 	err = yaml.Unmarshal(b, &d)
 	if err != nil {
-		return err
+		return db, err
 	}
 	dbinfo := fmt.Sprintf("user=%s password=%s dbname=%s sslmode=disable",
 		d.Username, d.Password, d.DbName)
 	// open the db
 	db.db, err = sql.Open("postgres", dbinfo)
-	return err
+	return db, err
 }
 
 // Disconnect the database

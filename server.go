@@ -15,8 +15,10 @@ import (
 )
 
 func main() {
-	var db database.KataDB
-	db.Connect()
+	db, err := database.Connect()
+	if err != nil {
+		panic(err)
+	}
 	defer db.Disconnect()
 	db.GenerateSecureCookie()
 	kc := controllers.NewController(&db)
